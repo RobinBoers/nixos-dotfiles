@@ -301,8 +301,8 @@ in {
       repaint_delay = 0;
       background = "#${color-scheme.bg}";
       foreground = "#${color-scheme.fg}";
-      selection_foreground = "#${color-scheme.fg}";
-      selection_background = "#${color-scheme.bg}";
+      selection_foreground = "#${color-scheme.bg}";
+      selection_background = "#${color-scheme.fg}";
       cursor = "#${color-scheme.fg}";
       color0 = "#${color-scheme.color0}";
       color1 = "#${color-scheme.color1}";
