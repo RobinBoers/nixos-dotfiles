@@ -36,22 +36,6 @@ let
     '';
   };
 
-  wayland-gnome-session = pkgs.writeTextFile {
-    name = "wayland-gnome-session";
-    destination = "/bin/wayland-gnome-session";
-    executable = true;
-
-    text = ''
-      
-
-      # Start keyring daemon
-      ${pkgs.gnome.gnome-keyring}/usr/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring
-
-      # Start polkit
-      ${pkgs.polkit_gnome}/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1      
-    '';
-  };
-
   terminal = "${pkgs.kitty}/bin/kitty";
   sway-systemd-target = "sway-session.target";
 
@@ -342,11 +326,44 @@ in {
     };
   };
 
+  systemd.user.services.gnome-keyring = {
+    Unit = {
+      Description = "GNOME Keyring";
+      PartOf = "graphical-session.target";
+    };
+    Service = {
+      Type = "dbus";
+      BusName = "org.gnome.keyring";
+      BusName = "org.freedesktop.secrets";
+      ExecStart = "${pkgs.gnome.gnome-keyring}/usr/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
+      ExecStartPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
+      ExecStopPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+    };
+    Install = {
+      WantedBy = sway-systemd-target;
+    };
+  };
+
+  systemd.user.services.gnome-polkit = {
+    Unit = {
+      Description = "Legacy polkit authentication agent for GNOME";
+      PartOf = "graphical-session.target";
+      After = "graphical-session.target";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 ";
+    };
+    Install = {
+      WantedBy = sway-systemd-target;
+    };
+  };
+
   wayland.windowManager.sway = {
     enable = false; # Sway is configured in configuration.nix, 
                     # because it provides some extra features.
-    xwayland = true;
 
+    xwayland = true;
     config = {
       modifier = "Mod4";
       input = {
