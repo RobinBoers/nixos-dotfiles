@@ -137,7 +137,7 @@
   # TTY environment
   console = {
     earlySetup = true;
-    font = "${pkgs.terminus_font}/share/consolefonts/ter-132n.psf.gz";
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-112n.psf.gz";
     packages = with pkgs; [ terminus_font ];
   };  
 
@@ -191,7 +191,7 @@
       export NIXOS_OZONE_WL=1
       export _JAVA_AWT_WM_NOREPARENTIN=1
       export SDL_VIDEODRIVER=wayland
-      export QT_QPA_PLATFORM=wayland-egl
+      export QT_QPA_PLATFORM=wayland
       export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
       export MOX_ENABLE_WAYLAND=1
     '';

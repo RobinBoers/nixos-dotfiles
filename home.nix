@@ -89,13 +89,16 @@ in {
     rm = "rm -ri";
     cp = "cp -i";
     mv = "mv -i";
+    la = "ls -a";
     ".." = "cd ..";
     less = "less -QFr";
   };
 
   programs.fish = {
-    enable = false; # Managed in configuration.nix
-    interactiveShellInit = ''
+    enable = true; # Managed in configuration.nix
+    
+    shellAliases = config.home.shellAliases;
+    shellInit = ''
       # Disable welcome message when logging in
       set fish_greeting
 
@@ -359,7 +362,7 @@ in {
       character = {
         success_symbol = "[>](bold green)";
         error_symbol = "[x](bold red)";
-        vimcdm_symbol = "[<](bold green)";
+        vimcmd_symbol = "[<](bold green)";
       };
       git_commit = {
         tag_symbol = " tag ";
