@@ -294,10 +294,10 @@ in {
       size = 15;
     };
     settings = {
-      enable_audio_bell = false;
-      remember_window_size = false;
+      enable_audio_bell = "no";
+      remember_window_size = "no";
       window_padding_width = 30;
-      confirm_os_window_close = false;
+      confirm_os_window_close = 0;
       repaint_delay = 0;
       background = "#${color-scheme.bg}";
       foreground = "#${color-scheme.fg}";
