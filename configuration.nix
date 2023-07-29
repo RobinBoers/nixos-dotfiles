@@ -107,6 +107,9 @@
 
     # Home manager
     home-manager
+
+    # Needed to make VM work
+    libva
   ];
 
   # Autoupdating
@@ -206,14 +209,9 @@
     enable = true;
 
     # Needed to make Sway work in VMs
-    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" ]; }).drivers;
+    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
   };
 
-  # Needed for VM to work
-  boot.kernelModules = [ "virtio" "virtio_gpu" "video=virtiofb:1024x768" ];
-  environment.etc."nixos-opengl-driver".text = ''
-    driDrivers = [ "i965" "radeon" "svga" "virtio_gpu" ];
-  '';
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
