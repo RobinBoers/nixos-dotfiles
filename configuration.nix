@@ -79,6 +79,7 @@
     curl
     neovim
     htop
+    openssh
 
     # CLI tools    
     fish
