@@ -155,6 +155,7 @@
   # Sound
   sound.enable = true;
   security.rtkit.enable = true;
+  hardware.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -221,15 +222,13 @@
   
   xdg.mime.enable = true;
   xdg.icons.enable = true;
-  xdg.portal.enable = true
+  xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;
 
   # GTK portal needed to make GTK apps happy
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   # GNOME services
-  services.gnome.core-os-services.enable = true;
-  services.gnome.core-utilities.enable = true;
   services.gnome.gnome-keyring.enable = true;
   services.gnome.gnome-settings-daemon.enable = true;
   services.gvfs.enable = true;
