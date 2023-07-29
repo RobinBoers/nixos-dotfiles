@@ -50,14 +50,10 @@ in {
       clipman
       brightnessctl
       playerctl
+      wl-clipboard
 
       # Desktop integration
-      glib # gsettings support
-      xdg-utils # for opening programs using custom handlers (steam:// etc.)
-      gnome.gnome-session
-      gnome.gnome-settings-daemon
-      gnome.gnome-keyring
-      polkit_gnome
+      gsettings-desktop-schemas
       
       # Sway services
       swaybg
@@ -165,20 +161,22 @@ in {
     enable = true;
     systemdTarget = sway-systemd-target;
     profiles = {
+      vm = {
+        outputs = [
+          {
+            criteria = "Virtual-1";
+            mode = "1920x1090";
+            position = "0,0";
+          }
+        ];
+      };
       undocked = {
         outputs = [
           {
             criteria = "eDP-1";
             mode = "1920x1090";
             position = "0,0";
-          }
-
-          # For VMs
-          {
-            criteria = "Virtual-1";
-            mode = "1920x1090";
-            position = "0,0";
-          }
+          }          
         ];
       };
       home-two-displays = {
@@ -340,47 +338,15 @@ in {
     };
   };
 
-  systemd.user.services.gnome-keyring = {
-    Unit = {
-      Description = "GNOME Keyring";
-      PartOf = "graphical-session.target";
-    };
-    Service = {
-      Type = "dbus";
-      BusName = [ "org.gnome.keyring" "org.freedesktop.secrets" ];
-      ExecStart = "${pkgs.gnome.gnome-keyring}/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
-      ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
-      ExecStopPost = "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
-    };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
-  };
-
-  systemd.user.services.gnome-polkit = {
-    Unit = {
-      Description = "Legacy polkit authentication agent for GNOME";
-      PartOf = "graphical-session.target";
-      After = "graphical-session.target";
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-    };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
-  };
-
   wayland.windowManager.sway = 
     let mod = "Mod4"; in {
     enable = true;
     package = null; # Managed in configuration.nix
 
     xwayland = true;
-    terminal = terminal;
     config = {
       modifier = mod;
+      terminal = terminal;
       input = {
         "type:touchpad" = {
           tap = "enabled";

@@ -90,7 +90,6 @@
     thefuck
     
     # Graphical
-    gnome.gnome-control-center
     gnome.seahorse
     gnome.nautilus
     libreoffice
@@ -101,11 +100,23 @@
     adw-gtk3
     gnome.adwaita-icon-theme
 
-    # Wayland
+    # GNOME + Sway
+    # (most configuration is done in home.nix)
     wayland
     sway
+    xdg-utils # for opening programs using custom handlers (steam:// etc.)
+    xdg-desktop-portal-gtk
+    xdg-desktop-portal-wlr
+    glib # gsettings support
+    gnome.gnome-settings-daemon
+    gnome.gnome-keyring
+    gnome.gnome-control-center
+    gnome.gnome-session
+    gnome.dconf-editor
+    polkit_gnome
     qt5.qtwayland
-    clipman
+    sound-theme-freedesktop
+
 
     # Home manager
     home-manager
@@ -180,7 +191,18 @@
     };
   };
 
-  # Wayland
+  # OpenGL
+  hardware.opengl = {
+    enable = true;
+
+    # Needed to make Sway work in VMs
+    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
+  };
+
+
+  # Graphical session
+  # Sway + GNOME
+
   programs.sway = {
     enable = true;
     wrapperFeatures = {
@@ -197,23 +219,26 @@
     '';
   };
   
+  xdg.mime.enable = true;
+  xdg.icons.enable = true;
+  xdg.portal.enable = true
+  xdg.portal.wlr.enable = true;
+
+  # GTK portal needed to make GTK apps happy
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+
+  # GNOME services
+  services.gnome.core-os-services.enable = true;
+  services.gnome.core-utilities.enable = true;
+  services.gnome.gnome-keyring.enable = true;
+  services.gnome.gnome-settings-daemon.enable = true;
+  services.gvfs.enable = true;
+  services.gnome.glib-networking.enable = true;
+  services.gnome.gnome-browser-connector.enable = true;
+
+  # Misc
   services.dbus.enable = true;
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-
-    # GTK portal needed to make GTK apps happy
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  };
-
-  # OpenGL
-  hardware.opengl = {
-    enable = true;
-
-    # Needed to make Sway work in VMs
-    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
-  };
-
+  services.avahi.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
