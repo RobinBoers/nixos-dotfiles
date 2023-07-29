@@ -90,11 +90,12 @@
     thefuck
     
     # Graphical
+    gnome.gnome-control-center
+    gnome.seahorse
     gnome.nautilus
+    libreoffice
     xarchiver
     feh
-    gnome.seahorse
-    libreoffice    
 
     # Theming
     adw-gtk3
@@ -104,6 +105,7 @@
     wayland
     sway
     qt5.qtwayland
+    clipman
 
     # Home manager
     home-manager
