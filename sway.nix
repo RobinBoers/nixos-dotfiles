@@ -263,8 +263,8 @@ in {
       Type = "dbus";
       BusName = "org.freedesktop.Notifications";
       ExecCondition = "/bin/sh -c '[ -n \"$WAYLAND_DISPLAY\" ]'";
-      ExecStart = "${pkgs.mako}/usr/bin/mako";
-      ExecReload = "${pkgs.mako}/usr/bin/makoctl reload";
+      ExecStart = "${pkgs.mako}/bin/mako";
+      ExecReload = "${pkgs.mako}/bin/makoctl reload";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -278,7 +278,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.autotiling}/usr/bin/autotiling";
+      ExecStart= "${pkgs.autotiling}/bin/autotiling";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -293,7 +293,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.swayest-workstyle}/usr/bin/sworkstyle";
+      ExecStart= "${pkgs.swayest-workstyle}/bin/sworkstyle";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -308,7 +308,7 @@ in {
     };
     Service = {
       Type = "oneshot";
-      ExecStart= "/bin/sh -c 'swaymsg output \* bg $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev) fill'";
+      ExecStart= "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \* bg $(${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri | ${pkgs.coreutils}/bin/cut -c 9- | ${pkgs.util-linux}/bin/rev | ${pkgs.coreutils}/bin/cut -c 2- | ${pkgs.util-linux}/bin/rev) fill'";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -323,7 +323,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.playerctl}/usr/bin/playerctld";
+      ExecStart= "${pkgs.playerctl}/bin/playerctld";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -338,9 +338,9 @@ in {
     Service = {
       Type = "dbus";
       BusName = [ "org.gnome.keyring" "org.freedesktop.secrets" ];
-      ExecStart = "${pkgs.gnome.gnome-keyring}/usr/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
-      ExecStartPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
-      ExecStopPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+      ExecStart = "${pkgs.gnome.gnome-keyring}/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
+      ExecStartPost = "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
+      ExecStopPost = "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -355,7 +355,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart = "${pkgs.polkit_gnome}/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 ";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -502,7 +502,6 @@ in {
           # Scratchpad
           "${mod}+Shift+BackSpace" = "move scratchpad";
           "${mod}+BackSpace" = "scratchpad show";
-          "${mod}+equal" = "[class=\"Spotify\"] scratchpad show";
       };
       startup = 
         let gnome-schema = "org.gnome.desktop.interface"; 
@@ -548,7 +547,7 @@ in {
         # Autostart Spotify & configure scatchpad
         exec --no-startup-id com.spotify.Client
         for_window [class=\"Spotify\"] move scratchpad, resize set 1880 1010;
-        bindsym $mod+equal [class=\"Spotify\"] scratchpad show
+        bindsym ${mod}+equal [class=\"Spotify\"] scratchpad show
 
         # Setup wob
         set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
