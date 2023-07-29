@@ -40,7 +40,7 @@ let
   sway-systemd-target = "sway-session.target";
 
 in {
-  home.packages = with pkgs; {
+  home.packages = with pkgs; [
       wayland-dbus-environment
       wayland-gsettings
       
@@ -64,7 +64,7 @@ in {
       autotiling
       swayest-workstyle
       wob
-  };
+  ];
 
   programs.rofi = {
     enable = true;
@@ -74,7 +74,7 @@ in {
     terminal = terminal;
     extraConfig = {
       modes = [ "combi" ];
-      combi-modes =  [ "drun", "run" ];
+      combi-modes =  [ "drun" "run" ];
       show-icons = false;
       display-drun = "";
       drun-display-format = "{name}";
@@ -93,15 +93,15 @@ in {
         padding = 5;
         y-offset = mkLiteral "46px";
       };
-      "mainbox" {
-        border: 0;
-	      padding: 0;
+      "mainbox" = {
+        border = 0;
+	      padding = 0;
       };
       "textbox" = {
         text-color = mkLiteral "#FFFFFF";
       };
       "listview" = {
-        fixed-height: 0;
+        fixed-height = 0;
         spacing = mkLiteral "2px";
         scrollbar = true;
       };
@@ -136,14 +136,17 @@ in {
         text-color = mkLiteral "#FFFFFF";
         background-color = mkLiteral "#285577";
         padding = mkLiteral "1px";
-        children = [ mkLiteral "entry", mkLiteral "case-indicator" ];
+        children = [ 
+          (mkLiteral "entry")
+          (mkLiteral "case-indicator")
+        ];
       };
       "case-indicator" = {
         spacing = 0;
 	      text-color = mkLiteral "#FFFFFF";
       };
       "entry" = {
-        spacing: 0;
+        spacing = 0;
 	      text-color = mkLiteral "#FFFFFF";
       };
       "prompt" = {
@@ -165,7 +168,7 @@ in {
             criteria = "eDP-1";
             mode = "1920x1090";
             position = "0,0";
-          };
+          }
         ];
       };
       home-two-displays = {
@@ -173,13 +176,13 @@ in {
           {
             criteria = "Arnos Insturments & Computer Systems LE-22 00112";
             mode = "1920x1080";
-            position = "0,0"
-          };
+            position = "0,0";
+          }
           {
             criteria = "eDP-1";
             mode = "1920x1090";
             position = "0,1080";
-          };
+          }
         ];
       };
       work-three-displays = {
@@ -188,17 +191,17 @@ in {
             criteria = "eDP-1";
             mode = "1920x1090";
             position = "5120,0";
-          };
+          }
           {
             criteria = "DP-1";
             mode = "2560x1440";
             position = "2560,0";
-          };
+          }
           {
             criteria = "HDMI-A-1";
             mode = "2560x1440";
             position = "0,0";
-          };
+          }
         ];
       };
       work-singe-display = {
@@ -206,17 +209,17 @@ in {
           {
             criteria = "eDP-1";
             status = "disable";
-          };
+          }
           {
             criteria = "DP-1";
             mode = "2560x1440";
             position = "2560,0";
-          };
+          }
           {
             criteria = "HDMI-A-1";
             mode = "2560x1440";
             position = "0,0";
-          };
+          }
         ];
       };
     };
@@ -233,7 +236,7 @@ in {
         event = "before-sleep";
         command = "swaylock --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
       }
-    ]
+    ];
   };
 
   # Notification daemon
@@ -249,6 +252,7 @@ in {
 
   # Create systemd service files for services
   # that don't bind to systemd themselves.
+
   systemd.user.services.mako = {
     Unit = {
       Description = "Lightweight Wayland notification daemon";
@@ -263,7 +267,7 @@ in {
       ExecReload = "${pkgs.mako}/usr/bin/makoctl reload";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -277,7 +281,7 @@ in {
       ExecStart= "${pkgs.autotiling}/usr/bin/autotiling";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -292,7 +296,7 @@ in {
       ExecStart= "${pkgs.swayest-workstyle}/usr/bin/sworkstyle";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -307,7 +311,7 @@ in {
       ExecStart= "/bin/sh -c 'swaymsg output \* bg $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev) fill'";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
   
@@ -322,7 +326,7 @@ in {
       ExecStart= "${pkgs.playerctl}/usr/bin/playerctld";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -333,14 +337,13 @@ in {
     };
     Service = {
       Type = "dbus";
-      BusName = "org.gnome.keyring";
-      BusName = "org.freedesktop.secrets";
+      BusName = [ "org.gnome.keyring" "org.freedesktop.secrets" ];
       ExecStart = "${pkgs.gnome.gnome-keyring}/usr/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
       ExecStartPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
       ExecStopPost = "${pkgs.gnome.gnome-keyring}/usr/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -355,7 +358,7 @@ in {
       ExecStart = "${pkgs.polkit_gnome}/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 ";
     };
     Install = {
-      WantedBy = sway-systemd-target;
+      WantedBy = [ sway-systemd-target ];
     };
   };
 
@@ -386,7 +389,7 @@ in {
       bars.taskbar = {
         colors = {
           # iceberg
-          background = "#14141d"
+          background = "#14141d";
           
           # windows
           # background = "#d1e5ef";
@@ -424,7 +427,7 @@ in {
         in lib.mkOptionDefault {
           # Alt-Tab to switch between workspaces
           "Mod1+Tab" = "workspace back_and_forth";
-          "${mod}+Tab workspace back_and_forth";
+          "${mod}+Tab" = "workspace back_and_forth";
 
           # Ctrl+Tab to cycle windows in tabbed mode
           # "Control+Tab" = "focus next"; 
@@ -500,41 +503,39 @@ in {
       };
       startup = 
         let gnome-schema = "org.gnome.desktop.interface"; 
-        in {
-          [
-            # Setup wayland session
-            { command = "wayland-dbus-environment" }
-            { command = "wayland-gsettings" }
+        in [
+        # Setup wayland session
+        { command = "wayland-dbus-environment"; }
+        { command = "wayland-gsettings"; }
 
-            # Font settings
-            { command = "gsettings set ${gnome-schema} font-name 'Inter'"; }
-            { command = "gsettings set ${gnome-schema} document-font-name 'Inter'"; }
-            { command = "gsettings set ${gnome-schema} font-antialiasing 'grayscale'"; }
-            { command = "gsettings set ${gnome-schema} font-hinting 'slight'"; }
+        # Font settings
+        { command = "gsettings set ${gnome-schema} font-name 'Inter'"; }
+        { command = "gsettings set ${gnome-schema} document-font-name 'Inter'"; }
+        { command = "gsettings set ${gnome-schema} font-antialiasing 'grayscale'"; }
+        { command = "gsettings set ${gnome-schema} font-hinting 'slight'"; }
 
-            # Disable audible bell
-            { 
-              command = "gsettings set org.gnome.desktop.wm.preferences audible-bell false"; 
-              # (Determines whether applications or the system can generate audible “beeps”; may be used in conjunction with “visual bell” to allow silent “beeps”.)
-            }
-            
-            # Prepare overlay image for swaylock
-            # (See swaylock config for more info)
-            { 
-              command = "convert -size 1920x60 xc:transparent -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+0 'Type password to unlock' /tmp/locktext.png"; 
-            }
+        # Disable audible bell
+        { 
+          command = "gsettings set org.gnome.desktop.wm.preferences audible-bell false"; 
+          # (Determines whether applications or the system can generate audible “beeps”; may be used in conjunction with “visual bell” to allow silent “beeps”.)
+        }
+        
+        # Prepare overlay image for swaylock
+        # (See swaylock config for more info)
+        { 
+          command = "convert -size 1920x60 xc:transparent -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+0 'Type password to unlock' /tmp/locktext.png"; 
+        }
 
-            # Clipboard
-            { command = "wl-paste -t text --watch clipman store"; }
+        # Clipboard
+        { command = "wl-paste -t text --watch clipman store"; }
 
-            # Start systemd services
-            { command = "systemctl --user start swaybg"; always = true; }
-            { command = "systemctl --user start ${sway-systemd-target}"; }
+        # Start systemd services
+        { command = "systemctl --user start swaybg"; always = true; }
+        { command = "systemctl --user start ${sway-systemd-target}"; }
 
-            # Cool windows logo
-            # { command = "swaymsg rename workspace number 0 to "; }
-          ]
-      };
+        # Cool windows logo
+        # { command = "swaymsg rename workspace number 0 to "; }
+      ];
 
       # Options that couldn't be configured using Home Manager.
       extraConfig = 

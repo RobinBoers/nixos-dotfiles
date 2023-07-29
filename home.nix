@@ -31,7 +31,8 @@ in {
   home.username = "robin";
   home.homeDirectory = "/home/robin";
 
-  programs.home-manager.enable = true;
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
@@ -95,8 +96,8 @@ in {
   programs.fish = {
     enable = false; # Managed in configuration.nix
     interactiveShellInit = ''
-      # Source NixOS configuration
-      source /etc/profile
+      # Disable welcome message when logging in
+      set fish_greeting
 
       # Fancy TTY color scheme.
       echo -e "
@@ -133,20 +134,22 @@ in {
     };
     delta = {
       enable = true;
-      decorations = {
-        commit-decoration-style = "blue ol";
-        commit-style = "raw";
-        file-style = "omit";
-        hunk-header-decoration-style = "blue box";
-        hunk-header-file-style = "red";
-        hunk-header-style = "file line-number syntax";
-      };
-      features = "decorations";
-      nagivate = "true"; #Use n and N to jump between sections
-      interactive = {
-        keep-plus-minus-markers = false;
-        side-by-side = true;
-        line-numbers = true;
+      options = {
+        decorations = {
+          commit-decoration-style = "blue ol";
+          commit-style = "raw";
+          file-style = "omit";
+          hunk-header-decoration-style = "blue box";
+          hunk-header-file-style = "red";
+          hunk-header-style = "file line-number syntax";
+        };
+        features = "decorations";
+        nagivate = "true"; #Use n and N to jump between sections
+        interactive = {
+          keep-plus-minus-markers = false;
+          side-by-side = true;
+          line-numbers = true;
+        };
       };
     };
     extraConfig = {
@@ -158,7 +161,7 @@ in {
       };
       pull = {
         rebase = false;
-        ff = "only"
+        ff = "only";
       };
       aliases = {
         co = "checkout";
@@ -183,7 +186,7 @@ in {
       git_protocol = "ssh";
       prompt = "enabled";
       aliases = {
-        co = "pr checkout"
+        co = "pr checkout";
       };
     };
   };
@@ -200,14 +203,14 @@ in {
       };
       "*.py" = {
         indent_size = "4";
-      }
+      };
     };
   };
 
   programs.vscode = {
     enable = true;
     mutableExtensionsDir = false; # Don't let VSCode manage extensions.
-    extenstions = with pkgs.vscode-extensions; [
+    extensions = with pkgs.vscode-extensions; [
       elixir-lsp.vscode-elixir-ls
       github.github-vscode-theme
       eamodio.gitlens
@@ -217,7 +220,7 @@ in {
       phoenixframework.phoenix
       esbenp.prettier-vscode
       bradlc.vscode-tailwindcss
-      vscode-icons-theme.vscode-icons
+      vscode-icons-team.vscode-icons
       redhat.vscode-xml
       redhat.vscode-yaml
       tamasfe.even-better-toml
@@ -227,20 +230,20 @@ in {
       piousdeer.adwaita-theme
       dbaeumer.vscode-eslint
       rust-lang.rust-analyzer
-    };
+    ];
   };
 
   programs.ssh = {
     enable = true;
     matchBlocks = {
       "github.com" = {
-         user = "git";
-	        identityFile = "${config.home.homeDirectory}/.ssh/github";
+        user = "git";
+        identityFile = "${config.home.homeDirectory}/.ssh/github";
       };
       "geheimesite.nl" = {
         hostname = "94.124.122.11";
         user = "robin";
-        identifyFile = "${config.home.homeDirectory}/.ssh/sweet";
+        identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };
       "vps.geheimesite.nl" = {
         hostname = "45.140.190.5";
@@ -249,9 +252,9 @@ in {
       };
       "git.geheimesite.nl" = {
         hostname = "45.140.190.5";
-        port = "222";
+        port = 222;
         user = "git";
-        identityFile = "${config.home.homeDirectory}/.ssh/github"
+        identityFile = "${config.home.homeDirectory}/.ssh/github";
       };
     };
   };
@@ -260,10 +263,10 @@ in {
     enable = false; # Managed in configuration.nix
     gtk3 = {
       bookmarks = [
-        file://${config.home.homeDirectory}/projects
-        file://${config.home.homeDirectory}/projects/qdentity
-        file://${config.home.homeDirectory}/pictures/screenshots
-        file://${config.home.homeDirectory}/games
+        "file://${config.home.homeDirectory}/projects"
+        "file://${config.home.homeDirectory}/projects/qdentity"
+        "file://${config.home.homeDirectory}/pictures/screenshots"
+        "file://${config.home.homeDirectory}/games"
       ];
       extraConfig = {
         gtk-button-images = "1";
@@ -277,6 +280,7 @@ in {
         gtk-xft-hinting = "1";
         gtk-xft-hintstyle = "hintful";
       };
+    };
   };
 
   programs.kitty = {
@@ -343,7 +347,7 @@ in {
 
   programs.starship = {
     enable = true;
-    package = pkgs.startship;
+    package = pkgs.starship;
 
     enableFishIntegration = true;
     settings = {
@@ -403,7 +407,7 @@ in {
     package = pkgs.pass-wayland;
     
     settings = {
-      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.passwords"
+      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.passwords";
     };
   };
 
@@ -419,11 +423,13 @@ in {
     #   org.gradle.daemon.idletimeout=3600000
     # '';
 
-    ".githooks/pre-push" = ''
+    ".githooks/pre-push".text = ''
       #!/bin/sh
       bix pre-push
     '';
   }; 
+
+  programs.home-manager.enable = true;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
