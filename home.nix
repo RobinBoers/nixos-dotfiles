@@ -68,9 +68,6 @@ in {
   # Enable home-manager-help tool
   manual.html.enable = true;
 
-  # Not found hook for shell (might be slow, but very useful)
-  programs.command-not-found.enable = true;
-
   home.shellAliases = {
     sudo = "doas";
     sudoedit = "doas $EDITOR";
@@ -89,13 +86,12 @@ in {
     rm = "rm -ri";
     cp = "cp -i";
     mv = "mv -i";
-    la = "ls -a";
     ".." = "cd ..";
     less = "less -QFr";
   };
 
   programs.fish = {
-    enable = true; # Managed in configuration.nix
+    enable = true;
     
     shellAliases = config.home.shellAliases;
     shellInit = ''
@@ -128,7 +124,8 @@ in {
   # Configure git identity, aliases
   # and delta diff.
   programs.git = {
-    enable = false; # Managed in configuration.nix
+    enable = true;
+
     userName = "Robin Boers";
     userEmail = "robindev2019@outlook.com";
     signing = {
@@ -183,7 +180,8 @@ in {
   # Configure gh CLI tool
   # for authenticating with GitHub.
   programs.gh = {
-    enable = false; # Managed in configuration.nix
+    enable = true;
+
     enableGitCredentialHelper = true;
     settings = {
       git_protocol = "ssh";
@@ -264,7 +262,8 @@ in {
   };
 
   gtk = {
-    enable = false; # Managed in configuration.nix
+    enable = true;
+
     gtk3 = {
       bookmarks = [
         "file://${config.home.homeDirectory}/projects"
@@ -288,8 +287,10 @@ in {
   };
 
   programs.kitty = {
-    enable = false; # Managed in configuration.nix
+    enable = true;
+
     font = {
+      name = "monospace";
       size = 15;
     };
     settings = {
@@ -331,7 +332,7 @@ in {
   };
 
   programs.bat = {
-    enable = false; # Managed in configuration.nix
+    enable = true; 
 
     config = {
       theme = "base16";
@@ -343,7 +344,7 @@ in {
   };
 
   programs.exa = {
-    enable = false; # Managed in configuration.nix
+    enable = true;
 
     enableAliases = true;
     extraOptions = [ "--group-directories-first" ];

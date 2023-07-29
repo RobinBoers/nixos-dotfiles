@@ -2,7 +2,8 @@
 
 {
   programs.neovim = {
-    enable = false; # Managed in configuration.nix
+    enable = true; 
+
     defaultEditor = true;
     vimAlias = true;
     extraConfig = ''

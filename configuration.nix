@@ -82,19 +82,14 @@
     openssh
 
     # CLI tools    
-    fish
-    exa
-    bat
     fd
     ripgrep
     jq
-    gh
     yt-dlp
     lazygit
     thefuck
     
     # Graphical
-    kitty
     gnome.nautilus
     xarchiver
     feh
@@ -205,6 +200,20 @@
     # GTK portal needed to make GTK apps happy
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
+
+  # OpenGL
+  hardware.opengl = {
+    enable = true;
+
+    # Needed to make Sway work in VMs
+    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" ]; }).drivers;
+  };
+
+  # Needed for VM to work
+  boot.kernelModules = [ "virtio" "virtio_gpu" "video=virtiofb:1024x768" ];
+  environment.etc."nixos-opengl-driver".text = ''
+    driDrivers = [ "i965" "radeon" "svga" "virtio_gpu" ];
+  '';
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

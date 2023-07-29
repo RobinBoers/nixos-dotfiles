@@ -362,13 +362,14 @@ in {
     };
   };
 
-  wayland.windowManager.sway = {
-    enable = false; # Sway is configured in configuration.nix, 
-                    # because it provides some extra features.
+  wayland.windowManager.sway = 
+    let mod = "Mod4"; in {
+    enable = true;
+    package = null; # Managed in configuration.nix
 
     xwayland = true;
     config = {
-      modifier = "Mod4";
+      modifier = mod;
       input = {
         "type:touchpad" = {
           tap = "enabled";
@@ -386,45 +387,47 @@ in {
         wrapping = "workspace";
         newWindow = "urgent"; # Mark new windows as urgent (red in workspace bar), but don't let them steal focus.
       };
-      bars.taskbar = {
-        colors = {
-          # iceberg
-          background = "#14141d";
+      bars = [
+        {
+          colors = {
+            # iceberg
+            background = "#14141d";
+            
+            # windows
+            # background = "#d1e5ef";
+            # focusedWorkspace "#eef3f8 #eef3f8 #282A36";
+            # inactiveWorkspace = "#d1e5ef #d1e5ef #282A36";
+          };
           
-          # windows
-          # background = "#d1e5ef";
-          # focusedWorkspace "#eef3f8 #eef3f8 #282A36";
-          # inactiveWorkspace = "#d1e5ef #d1e5ef #282A36";
-        };
-        extraConfig = [
-          "height 40"
-          "workspace_min_width 40"
-        ];
+          extraConfig = ''
+            height 40
+            workspace_min_width 40
+            font pango:FontAwesome 13
+          '';
 
-        position = "bottom";
-        font = "pango:FontAwesome 13";
-        
-        # bumblebee-status hasn't been packaged for NixOS yet :(
-        # See https://github.com/tobi-wan-kenobi/bumblebee-status/issues/821
+          position = "bottom";
+          
+          # bumblebee-status hasn't been packaged for NixOS yet :(
+          # See https://github.com/tobi-wan-kenobi/bumblebee-status/issues/821
 
-        # When it will be packaged, I'd need to add a little script or something,
-        # that copies my iceberg-contrast-padding theme to /usr/share/bumblebee-status/themes/
+          # When it will be packaged, I'd need to add a little script or something,
+          # that copies my iceberg-contrast-padding theme to /usr/share/bumblebee-status/themes/
 
-        # statusCommand = "/usr/bin/bumblebee-status --theme iceberg-contrast-padding";
-      };
+          # statusCommand = "/usr/bin/bumblebee-status --theme iceberg-contrast-padding";
+        }
+      ];
       gaps = {
         # inner = 10;
         # outer = 5;
-        smartBorders = true;
-        smartGaps = false;
+        smartBorders = "no_gaps";
+        smartGaps = true;
       };
       window = {
         hideEdgeBorders = "smart";
         titlebar = false;
       };
       keybindings =
-        let mod = config.wayland.windowManager.sway.config.modifier;
-        in lib.mkOptionDefault {
+        lib.mkOptionDefault {
           # Alt-Tab to switch between workspaces
           "Mod1+Tab" = "workspace back_and_forth";
           "${mod}+Tab" = "workspace back_and_forth";
@@ -531,50 +534,46 @@ in {
 
         # Start systemd services
         { command = "systemctl --user start swaybg"; always = true; }
-        { command = "systemctl --user start ${sway-systemd-target}"; }
 
         # Cool windows logo
         # { command = "swaymsg rename workspace number 0 to "; }
       ];
-
-      # Options that couldn't be configured using Home Manager.
-      extraConfig = 
-        let mod = config.wayland.windowManager.sway.config.modifier; 
-        in [
-          # Start Rofi when pressing the Super key, because that is how it 
-          # works on Windows and that is how my workflow works :)
-          "bindcode --release 133 exec rofi -show drun"
-
-          # Autostart Spotify & configure scatchpad
-          "exec --no-startup-id com.spotify.Client"
-          "for_window [class=\"Spotify\"] move scratchpad, resize set 1880 1010;"
-          "bindsym $mod+equal [class=\"Spotify\"] scratchpad show"
-
-          # Setup wob
-          "set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock"
-          "exec rm -f $WOBSOCK && mkfifo $WOBSOCK && tail -f $WOBSOCK | wob"
-
-          # Media control (--locked is not available in Home Manager)
-          "bindsym --locked ${mod}+p                exec playerctl play-pause"
-          "bindsym --locked ${mod}+less             exec playerctl previous"
-          "bindsym --locked ${mod}+greater          exec playerctl next"
-
-          "bindsym --locked XF86AudioPlay           exec playerctl play-pause"
-          "bindsym --locked XF86AudioPause          exec playerctl pause"
-          "bindsym --locked XF86AudioNext           exec playerctl next"
-          "bindsym --locked XF86AudioPrev           exec playerctl previous"
-
-          # Volume control (--locked is not available in Home Manager)
-          "bindsym --locked XF86AudioRaiseVolume    exec pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK"
-          "bindsym --locked XF86AudioLowerVolume    exec pactl set-sink-volume @DEFAULT_SINK@ -5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK"
-          "bindsym --locked XF86AudioMute           exec pactl set-sink-mute @DEFAULT_SINK@ toggle"
-          "bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOURCE@ toggle "
-
-          # Brightness control (--locked is not available in Home Manager)
-          "bindsym --locked XF86MonBrightnessUp     exec brightnessctl s +5%"
-          "bindsym --locked XF86MonBrightnessDown   exec brightnessctl s 5%-"
-      ];
     };
+    # Options that couldn't be configured using Home Manager.
+    extraConfigEarly = ''
+        # Start Rofi when pressing the Super key, because that is how it 
+        # works on Windows and that is how my workflow works :)
+        bindcode --release 133 exec rofi -show drun
+
+        # Autostart Spotify & configure scatchpad
+        exec --no-startup-id com.spotify.Client
+        for_window [class=\"Spotify\"] move scratchpad, resize set 1880 1010;
+        bindsym $mod+equal [class=\"Spotify\"] scratchpad show
+
+        # Setup wob
+        set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
+        exec rm -f $WOBSOCK && mkfifo $WOBSOCK && tail -f $WOBSOCK | wob
+
+        # Media control (--locked is not available in Home Manager)
+        bindsym --locked ${mod}+p                exec playerctl play-pause
+        bindsym --locked ${mod}+less             exec playerctl previous
+        bindsym --locked ${mod}+greater          exec playerctl next
+
+        bindsym --locked XF86AudioPlay           exec playerctl play-pause
+        bindsym --locked XF86AudioPause          exec playerctl pause
+        bindsym --locked XF86AudioNext           exec playerctl next
+        bindsym --locked XF86AudioPrev           exec playerctl previous
+
+        # Volume control (--locked is not available in Home Manager)
+        bindsym --locked XF86AudioRaiseVolume    exec pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
+        bindsym --locked XF86AudioLowerVolume    exec pactl set-sink-volume @DEFAULT_SINK@ -5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
+        bindsym --locked XF86AudioMute           exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+        bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOURCE@ toggle 
+
+        # Brightness control (--locked is not available in Home Manager)
+        bindsym --locked XF86MonBrightnessUp     exec brightnessctl s +5%
+        bindsym --locked XF86MonBrightnessDown   exec brightnessctl s 5%-
+    '';
   };
 
   programs.swaylock = {
