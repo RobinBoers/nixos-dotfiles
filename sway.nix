@@ -66,6 +66,9 @@ in {
       wob
   ];
 
+  # Don't install foot!!
+  programs.foot.enable = false;
+
   programs.rofi = {
     enable = true;
     package = pkgs.rofi-wayland;
@@ -166,6 +169,13 @@ in {
         outputs = [
           {
             criteria = "eDP-1";
+            mode = "1920x1090";
+            position = "0,0";
+          }
+
+          # For VMs
+          {
+            criteria = "Virtual-1";
             mode = "1920x1090";
             position = "0,0";
           }
@@ -368,6 +378,7 @@ in {
     package = null; # Managed in configuration.nix
 
     xwayland = true;
+    terminal = terminal;
     config = {
       modifier = mod;
       input = {
