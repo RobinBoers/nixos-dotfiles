@@ -54,8 +54,8 @@
       call v:lua.require'gitsigns'.setup()
 
       " Integrated terminal
-      call v:lua.require'toggleterm'.setup()
-      nnoremap <C-`> :ToggleTerm dir=git_dir direction=float<cr>
+      "call v:lua.require'toggleterm'.setup()
+      "nnoremap <C-`> :ToggleTerm dir=git_dir direction=float<cr>
       "nnoremap <C-S-G> :ToggleTerm dir=git_dir direction=float go_back=0<cr>
 
       " Better UI
