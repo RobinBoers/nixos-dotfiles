@@ -508,8 +508,15 @@ in {
         # Clipboard
         { command = "wl-paste -t text --watch clipman store"; }
 
-        # Start systemd services
+        # Wallpaper
+        # ('always = true' is here to make wallpaper refresh
+        # when sway is reloaded)
         { command = "systemctl --user start swaybg"; always = true; }
+
+        # Start session & systemd services
+        # (The sway systemd target is automagically started,
+        # we don't have to start it manually here)
+        { command = "gnome-session --systemd"; }
 
         # Cool windows logo
         # { command = "swaymsg rename workspace number 0 to "; }

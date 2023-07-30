@@ -100,24 +100,6 @@
     adw-gtk3
     gnome.adwaita-icon-theme
 
-    # GNOME + Sway
-    # (most configuration is done in home.nix)
-    wayland
-    sway
-    xdg-utils # for opening programs using custom handlers (steam:// etc.)
-    xdg-desktop-portal-gtk
-    xdg-desktop-portal-wlr
-    glib # gsettings support
-    gnome.gnome-settings-daemon
-    gnome.gnome-keyring
-    gnome.gnome-control-center
-    gnome.gnome-session
-    gnome.dconf-editor
-    polkit_gnome
-    qt5.qtwayland
-    sound-theme-freedesktop
-
-
     # Home manager
     home-manager
 
@@ -141,6 +123,9 @@
 
   # Disable firewall
   networking.firewall.enable = false;
+
+  # Disable bluetooth
+  hardware.bluetooth.enable = false;
 
   # Use polkit for access to shutdown, reboot etc.
   security.polkit.enable = true;
@@ -210,6 +195,16 @@
       gtk = true;
       base  = true;
     };
+    extraPackages = with pkgs; [
+      xdg-utils # for opening programs using custom handlers (steam:// etc.)
+      glib # gsettings support
+      gnome.gnome-session
+      gnome.gnome-control-center
+      gnome.dconf-editor
+      qt5.qtwayland 
+      polkit_gnome
+      sound-theme-freedesktop
+    ];
     extraSessionCommands = ''
       export NIXOS_OZONE_WL=1
       export _JAVA_AWT_WM_NOREPARENTIN=1
@@ -229,13 +224,64 @@
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   # GNOME services
-  services.gnome.gnome-keyring.enable = true;
-  services.gnome.gnome-settings-daemon.enable = true;
+  # To make them start in sway, append `gnome-session --systemd`
+  # to the end of your `.config/sway/config`.
   services.gvfs.enable = true;
+  services.gnome.gnome-settings-daemon.enable = true;
   services.gnome.glib-networking.enable = true;
   services.gnome.gnome-browser-connector.enable = true;
+  services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files."
+
+  # Keyring & polkit
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.login.enableGnomeKeyring = true;
+  security.pam.services.passwd.enableGnomeKeyring = true;
+
+  systemd.user.services.gnome-keyring = {
+    description = "GNOME Keyring";
+    partOf = [ "graphical-session.target" ];
+
+    path = with pkgs; [
+      gnome.gnome-keyring
+      systemd
+    ];
+
+    script = "gnome-keyring-daemon";
+    scriptArgs = "--components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
+    postStart = "systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
+    postStop = "systemctl --user unset-environment SSH_AUTH_SOCK";
+
+    wantedBy = [ "gnome-session.target" ];
+   
+    serviceConfig = {
+      Type = "dbus";
+      BusName = [ "org.gnome.keyring" "org.freedesktop.secrets" ];
+    };
+  };
+
+  systemd.user.services.gnome-polkit = {
+    description = "Legacy polkit authentication agent for GNOME";
+    partOf = [ "graphical-session.target" ];
+
+    path = with pkgs; [
+      polkit_gnome
+    ];
+
+    script = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+
+    wantedBy = [ "gnome-session.target" ];
+
+    serviceConfig = {
+      Type = "simple";
+    };
+  };
+
+  # Make dbus work in Xwayland?
+  services.xserver.updateDbusEnvironment = true;
 
   # Misc
+  programs.dconf.enable = true;
+  services.udisks2.enable = true;
   services.dbus.enable = true;
   services.avahi.enable = true;
 
