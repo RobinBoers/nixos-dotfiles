@@ -111,6 +111,9 @@ in {
       # Disable welcome message when logging in
       set fish_greeting
 
+      # Enable amazing 'fuck' command
+      thefuck --alias | source
+
       # Fancy TTY color scheme.
       echo -e "
         \e]P0${color-scheme.color0}
