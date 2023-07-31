@@ -5,7 +5,7 @@
 ```shell
 cd /etc/nixos
 sudo rm -rf configuration.nix
-sudo wget https://hosted-at.geheimesite.nl/configuration.nix
+sudo wget https://raw.githubusercontent.com/RobinBoers/nixos-dotfiles/master/configuration.nix
 sudo nixos-rebuild switch
 ```
 
@@ -27,9 +27,9 @@ cd ~/.config/home-manager
 rm -rf home.nix
 
 # Pull home.nix & co
-wget https://hosted-at.geheimesite.nl/home.nix
-wget https://hosted-at.geheimesite.nl/sway.nix
-wget https://hosted-at.geheimesite.nl/neovim.nix
+wget https://raw.githubusercontent.com/RobinBoers/nixos-dotfiles/master/home.nix
+wget https://raw.githubusercontent.com/RobinBoers/nixos-dotfiles/master/sway.nix
+wget https://raw.githubusercontent.com/RobinBoers/nixos-dotfiles/master/neovim.nix
 ```
 
 ## 4. Restart shell & run home-manager
