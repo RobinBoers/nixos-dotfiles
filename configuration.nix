@@ -93,6 +93,7 @@
     openssh
     killall
     gnupg
+    pinentry
 
     # CLI tools    
     fd

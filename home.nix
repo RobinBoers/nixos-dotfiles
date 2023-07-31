@@ -159,7 +159,7 @@ in {
     userName = "Robin Boers";
     userEmail = "robindev2019@outlook.com";
     signing = {
-      key = "7EBA7FEA236B1DB0";
+      key = "B1181BC2D8530F64";
       signByDefault = true;
     };
 
@@ -221,6 +221,12 @@ in {
         co = "pr checkout";
       };
     };
+  };
+
+  services.gpg-agent = {
+    enable = true;
+    enableFishIntegration = true;
+    pinentryFlavor = "gnome3";
   };
 
 
