@@ -26,6 +26,80 @@ let
     color15 = "ffffff";
   };
 
+  newt-color-scheme = ''
+    root=lightgray,default
+    border=blue,default
+    window=lightgray,default
+    shadow=default,default
+    title=lightgray,default
+    button=black,blue
+    actbutton=blue,black
+    compactbutton=black,lightgray
+    checkbox=lightgray,black
+    actcheckbox=lightgray,cyan
+    entry=lightgray,default
+    disentry=gray,default
+    label=lightgray,default
+    listbox=lightgray,default
+    actlistbox=blue,default
+    sellistbox=lightgray,default
+    actsellistbox=black,blue
+    textbox=black,lightgray
+    acttextbox=black,blue
+    emptyscale=,gray
+    fullscale=,cyan
+    helpline=white,default
+    roottext=lightgrey,default
+  '';
+
+  dialog-color-scheme = ''
+    aspect = 0
+    separate_widget = ""
+    tab_len = 0
+    visit_items = OFF
+    use_scrollbar = OFF
+    use_shadow = OFF
+    use_colors = ON
+    screen_color = (BLUE,BLACK,ON)
+    shadow_color = (WHITE,BLACK,OFF)
+    dialog_color = (WHITE,BLACK,OFF)
+    title_color = (WHITE,BLACK,ON)
+    border_color = (BLUE,BLACK,ON)
+    button_active_color = (BLACK,BLUE,ON)
+    button_inactive_color = (BLACK,WHITE,ON)
+    button_key_active_color = button_active_color
+    button_key_inactive_color = (RED,WHITE,OFF)
+    button_label_active_color = (WHITE,BLUE,ON)
+    button_label_inactive_color = (BLACK,WHITE,ON)
+    inputbox_color = (WHITE,BLACK,OFF)
+    inputbox_border_color = (WHITE,BLACK,OFF)
+    searchbox_color = border_color
+    searchbox_title_color = title_color
+    searchbox_border_color = border_color
+    position_indicator_color = title_color
+    menubox_color = (WHITE,BLACK,OFF)
+    menubox_border_color = border_color
+    item_color = (WHITE,BLACK,OFF)
+    item_selected_color = button_active_color
+    tag_color = title_color
+    tag_selected_color = button_label_active_color
+    tag_key_color = button_key_inactive_color
+    tag_key_selected_color = (RED,BLUE,ON)
+    check_color = (WHITE,BLACK,OFF)
+    check_selected_color = button_active_color
+    uarrow_color = (GREEN,WHITE,ON)
+    darrow_color = uarrow_color
+    itemhelp_color = (WHITE,BLACK,OFF)
+    form_active_text_color = button_active_color
+    form_text_color = (WHITE,CYAN,ON)
+    form_item_readonly_color = (CYAN,WHITE,ON)
+    gauge_color = title_color
+    border2_color = border_color
+    inputbox_border2_color = border_color
+    searchbox_border2_color = border_color
+    menubox_border2_color = border_color
+  '';
+
 in {
   imports = [
     ./desktop.nix
@@ -79,6 +153,7 @@ in {
     GTK_OVERLAY_SCROLLING = "1";
     ERL_AFLAGS = "-kernel shell_history enabled";
     ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
+    NEWT_COLORS = newt-color-scheme;
   };
 
   home.shellAliases = {
@@ -473,11 +548,8 @@ in {
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
 
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
+    ".dialogrc".text = 
+      dialog-color-scheme;
 
     ".githooks/pre-push".text = ''
       #!/bin/sh
