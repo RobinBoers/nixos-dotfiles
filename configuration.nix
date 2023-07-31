@@ -24,6 +24,13 @@
   #networking.defaultGateway = "192.168.1.1";
   #networking.nameservers = [ "8.8.8.8" ];
   
+  # Hosts file
+  # (Optionally remove '-porn' from the url ;) ...)
+  networking.extraHosts = let
+    hostsPath = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts";
+    hostsFile = builtins.fetchurl hostsPath;
+  in builtins.readFile "${hostsFile}";
+  
 
   ## Locale
 
