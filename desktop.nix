@@ -72,7 +72,7 @@ let
     '';
   };  
 
-  gtk3-darkmode-daemon = {
+  gtk3-darkmode-daemon = pkgs.writeTextFile {
       name = "gtk3-darkmode-daemon";
       destination = "/bin/gtk3-darkmode-daemon";
       executable = true;
@@ -80,15 +80,17 @@ let
       text = ''
         #!/bin/sh
 
+        ${wayland-gsettings}/bin/wayland-gsettings
+
         sync_darkmode() {
           GNOME_SCHEMA="org.gnome.desktop.interface"
-          SCHEME=$(gsettings get $GNOME_SCHEMA color-scheme)
-          THEME=$(gsettings get $GNOME_SCHEMA gtk-theme)
+          SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
+          THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
 
           if [ "$SCHEME" == "'default'" ]; then
-            gsettings set $GNOME_SCHEMA gtk-theme "%%{THEME::-5}"
+            ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
           else
-            gsettings set $GNOME_SCHEMA gtk-theme "%%{THEME}-dark";
+            ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
           fi
         }
 
@@ -96,7 +98,7 @@ let
         sync_darkmode
 
         # Monitor gsettings to resync when the color scheme changes
-        gsettings monitor org.gnome.desktop.interface gtk-theme |
+        ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
         while read -r line; do
             sync_darkmode
         done
@@ -105,9 +107,13 @@ let
 
   ## Global
 
-  terminal = "${pkgs.kitty}/bin/kitty";
   gtk3-theme = "adw-gtk";
+  terminal = "${pkgs.kitty}/bin/kitty";
   sway-systemd-target = "sway-session.target";
+
+  color-scheme = {
+    dark = "14141d";
+  };
 
 in {
   ## Packages
@@ -396,7 +402,7 @@ in {
     };
     Service = {
       Type = "oneshot";
-      ExecStart= "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \* bg $(wayland-get-wallpaper) fill'";
+      ExecStart = "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -410,7 +416,7 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
+      ExecStart= "${gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -452,6 +458,7 @@ in {
           dwt = "disabled";
         };
         "*" = {
+          scroll_factor = "0.2"; # Only for VMs
           xkb_layout = "us";
           xkb_variant = "intl";
         };
@@ -465,7 +472,7 @@ in {
         {
           colors = {
             # iceberg
-            background = "#14141d";
+            background = "#${color-scheme.dark}";
             
             # windows
             # background = "#d1e5ef";
@@ -622,6 +629,7 @@ in {
         # we don't have to start it manually here)
       ];
     };
+
     # Options that couldn't be configured using Home Manager.
     extraConfigEarly = ''
         # Start Rofi when pressing the Super key, because that is how it 
@@ -629,9 +637,9 @@ in {
         bindcode --release 133 exec rofi -show drun
 
         # Autostart Spotify & configure scatchpad
-        exec --no-startup-id com.spotify.Client
-        for_window [class=\"Spotify\"] move scratchpad, resize set 1880 1010;
-        bindsym ${mod}+equal [class=\"Spotify\"] scratchpad show
+        exec --no-startup-id spotify
+        for_window [class="Spotify"] move scratchpad, resize set 1880 1010;
+        bindsym ${mod}+equal [class="Spotify"] scratchpad show
 
         # Setup wob
         set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
@@ -659,20 +667,21 @@ in {
     settings = {
       ignore-empty-password = true;
       clock = true;
-      text-color = "FFFFFF";
       font = "Liberation-Sans";
       timestr = "%H:%M";
       datestr = "%d/%m/%Y";
-      color = "1B1C1D";
       scaling = "fill";
       indicator = true;
       grace = 2;
-      key-hl-color = "009193";
-      effect-blur = "7x7";
-      effect-compose = "50%,70%;center;/tmp/locktext.png";
+
       # This imsage is generated when sway is started.
       # It is a little overlay that says "Type password to unlock", that I kinda like because pwetty.
+      effect-compose = "50%,70%;center;/tmp/locktext.png";
+      effect-blur = "7x7";
 
+      color = color-scheme.dark;
+      text-color = "FFFFFF";
+      key-hl-color = "009193";
       separator-color = "00000000";
       inside-color = "00000099";
       inside-clear-color = "FFD20400";
