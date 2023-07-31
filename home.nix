@@ -138,6 +138,19 @@ in {
   };
 
 
+  ## XDG directories
+
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = false;
+    documents = "${config.home.homeDirectory}/docs";
+    pictures = "${config.home.homeDirectory}/pictures";
+    download = "${config.home.homeDirectory}/downloads";
+    music = "${config.home.homeDirectory}/music";
+    videos = "${config.home.homeDirectory}/videoarchive";
+  }
+
+
   ## Git
 
   programs.git = {
