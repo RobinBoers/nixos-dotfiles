@@ -3,12 +3,8 @@
 let 
   ## Custom binaries
 
-  wayland-dbus-environment = pkgs.writeTextFile {
-    name = "wayland-dbus-environment";
-    destination = "/bin/wayland-dbus-environment";
-    executable = true;
-
-    text = ''
+  wayland-dbus-environment = 
+    pkgs.writeShellScriptBin "wayland-dbus-environment" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SWAYSOCK \
         I3SOCK \
         WAYLAND_DISPLAY \
@@ -24,92 +20,75 @@ let
       ${pkgs.systemd}/bin/systemctl --user stop pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
       ${pkgs.systemd}/bin/systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
     '';
-  };
 
-  wayland-gsettings = pkgs.writeTextFile {
-    name = "wayland-gsettings";
-    destination = "/bin/wayland-gsettings";
-    executable = true;
-    text = let
+  wayland-gsettings = 
+    let
       schema = pkgs.gsettings-desktop-schemas;
       datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-    in ''
+    in
+    pkgs.writeShellScriptBin "wayland-gsettings" ''
       export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
     '';
-  };
 
-  wayland-screenshot = pkgs.writeTextFile {
-    name = "wayland-screenshot";
-    destination = "/bin/wayland-screenshot";
-    executable = true;
-
-    text = ''
+  wayland-screenshot = 
+    pkgs.writeShellScriptBin "wayland-screenshot" ''
       ${pkgs.slurp}/bin/slurp \
       | ${pkgs.grim}/bin/grim -g - - \
       | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.wl-clipboard}/bin/wl-paste \
       > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
     '';
-  };
 
-  wayland-get-wallpaper = pkgs.writeTextFile {
-    name = "wayland-get-wallpaper";
-    destination = "/bin/wayland-get-wallpaper";
-    executable = true;
+  # Since gnome-control-center and GNOME wallpapers in general
+  # don't work yet, I hard-code the wallpaper path here for now.
 
-    # Since gnome-control-center and GNOME wallpapers in general
-    # don't work yet, I hard-code the wallpaper path here for now.
+  # ''
+  #   ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
+  #   | ${pkgs.coreutils}/bin/cut -c 9- \
+  #   | ${pkgs.util-linux}/bin/rev \
+  #   | ${pkgs.coreutils}/bin/cut -c 2- \
+  #   | ${pkgs.util-linux}/bin/rev
+  # '';
 
-    # text = ''
-    #   ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
-    #   | ${pkgs.coreutils}/bin/cut -c 9- \
-    #   | ${pkgs.util-linux}/bin/rev \
-    #   | ${pkgs.coreutils}/bin/cut -c 2- \
-    #   | ${pkgs.util-linux}/bin/rev
-    # '';
-
-    text = ''
-    echo /home/robin/pictures/wallpaper.jpg
+  wayland-get-wallpaper = 
+    pkgs.writeShellScriptBin "wayland-get-wallpaper" ''
+      echo /home/robin/pictures/wallpaper.jpg
     '';
-  };  
 
-  gtk3-darkmode-daemon = pkgs.writeTextFile {
-      name = "gtk3-darkmode-daemon";
-      destination = "/bin/gtk3-darkmode-daemon";
-      executable = true;
+  # TODO(robin): refactor this.
+  # This is currently duplicated from `wayland-gsettings`.
 
-      # TODO(robin): refactor this.
-      # This is currently duplicated from `wayland-gsettings`.
+  gtk3-darkmode-daemon = 
+    let
+      schema = pkgs.gsettings-desktop-schemas;
+      datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+    in
+    pkgs.writeShellScriptBin "gtk3-darkmode-daemon" ''
+      #!/bin/sh
 
-      text = let
-        schema = pkgs.gsettings-desktop-schemas;
-        datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-      in  ''
-        #!/bin/sh
+      export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
 
-        export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
+      sync_darkmode() {
+        GNOME_SCHEMA="org.gnome.desktop.interface"
+        SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
+        THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
 
-        sync_darkmode() {
-          GNOME_SCHEMA="org.gnome.desktop.interface"
-          SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
-          THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
+        if [ "$SCHEME" == "'default'" ]; then
+          ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
+        else
+          ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
+        fi
+      }
 
-          if [ "$SCHEME" == "'default'" ]; then
-            ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
-          else
-            ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
-          fi
-        }
+      # Initial sync
+      sync_darkmode
 
-        # Initial sync
-        sync_darkmode
+      # Monitor gsettings to resync when the color scheme changes
+      ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
+      while read -r line; do
+          sync_darkmode
+      done
+    '';
 
-        # Monitor gsettings to resync when the color scheme changes
-        ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
-        while read -r line; do
-            sync_darkmode
-        done
-      '';
-  };
 
   ## Global
 
