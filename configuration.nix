@@ -149,7 +149,7 @@
     enable = true;
     bindings = let
       light = "${pkgs.light}/bin/light";
-      step = toString config.programs.light.brightnessKeys.step;
+      step = "10";
     in [
       {
         keys = [ 224 ];
