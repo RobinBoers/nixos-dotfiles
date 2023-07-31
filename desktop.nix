@@ -56,19 +56,57 @@ let
     destination = "/bin/wayland-get-wallpaper";
     executable = true;
 
-    text = ''
-      ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
-      | ${pkgs.coreutils}/bin/cut -c 9- \
-      | ${pkgs.util-linux}/bin/rev \
-      | ${pkgs.coreutils}/bin/cut -c 2- \
-      | ${pkgs.util-linux}/bin/rev
-    '';
-  };
+    # Since gnome-control-center and GNOME wallpapers in general
+    # don't work yet, I hard-code the wallpaper path here for now.
 
+    # text = ''
+    #   ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
+    #   | ${pkgs.coreutils}/bin/cut -c 9- \
+    #   | ${pkgs.util-linux}/bin/rev \
+    #   | ${pkgs.coreutils}/bin/cut -c 2- \
+    #   | ${pkgs.util-linux}/bin/rev
+    # '';
+
+    text = ''
+    echo /home/robin/pictures/wallpaper.jpg
+    '';
+  };  
+
+  gtk3-darkmode-daemon = {
+      name = "gtk3-darkmode-daemon";
+      destination = "/bin/gtk3-darkmode-daemon";
+      executable = true;
+
+      text = ''
+        #!/bin/sh
+
+        sync_darkmode() {
+          GNOME_SCHEMA="org.gnome.desktop.interface"
+          SCHEME=$(gsettings get $GNOME_SCHEMA color-scheme)
+          THEME=$(gsettings get $GNOME_SCHEMA gtk-theme)
+
+          if [ "$SCHEME" == "'default'" ]; then
+            gsettings set $GNOME_SCHEMA gtk-theme "%%{THEME::-5}"
+          else
+            gsettings set $GNOME_SCHEMA gtk-theme "%%{THEME}-dark";
+          fi
+        }
+
+        # Initial sync
+        sync_darkmode
+
+        # Monitor gsettings to resync when the color scheme changes
+        gsettings monitor org.gnome.desktop.interface gtk-theme |
+        while read -r line; do
+            sync_darkmode
+        done
+      '';
+  };
 
   ## Global
 
   terminal = "${pkgs.kitty}/bin/kitty";
+  gtk3-theme = "adw-gtk";
   sway-systemd-target = "sway-session.target";
 
 in {
@@ -89,6 +127,7 @@ in {
       
       # Sway services
       swaybg
+      gtk3-darkmode-daemon
       autotiling
       swayest-workstyle
       wob
@@ -363,6 +402,20 @@ in {
       WantedBy = [ sway-systemd-target ];
     };
   };
+
+  systemd.user.services.gtk3-darkmode-daemon = {
+    Unit = {
+      Description = "Simple daemon set the GTK theme based on the dark mode preference in GNOME";
+      PartOf = "graphical-session.target";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart= "${pkgs.gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
+    };
+    Install = {
+      WantedBy = [ sway-systemd-target ];
+    };
+  };
   
   systemd.user.services.playerctld = {
     Unit = {
@@ -557,7 +610,12 @@ in {
         # when sway is reloaded)
         { command = "systemctl --user start swaybg"; always = true; }
 
-        # Cool windows logo
+        # Set GTK theming
+        # TODO(robin): replace this with a time-based daemon later.
+        { command = "gsettings set org.gnome.desktop.interface.gtk-theme '${gtk3-theme}'"; }
+        { command = "gsettings set org.gnome.desktop.interface.color-scheme 'default'"; }
+
+        # Cool windows logo for first workspace
         # { command = "swaymsg rename workspace number 0 to "; }
 
         # (The sway systemd target is automagically started,

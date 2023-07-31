@@ -289,7 +289,7 @@
 
     # Starting GSD doesn't work unfortunately. NixOS masks the GSD systemd files for some reason, probably to prevent hacky setups like this. I tried unmasking using `systemd.user.targets.<name>.enable = true;`, but that didn't work out. I just got the message to run `systemctl --user daemon-reload`, and that didn't do anything (it didn't unmask the units and it also didn't make the message go away).
 
-    # I'll let this be for the moment.
+    # I'll let this be for the moment (which sucks because now I can't use gnome-control-center for Wifi or Bluetooth or appearance settings).
 
     wants = [
       "gsd-housekeeping.target"
