@@ -77,10 +77,16 @@ let
       destination = "/bin/gtk3-darkmode-daemon";
       executable = true;
 
-      text = ''
+      # TODO(robin): refactor this.
+      # This is currently duplicated from `wayland-gsettings`.
+
+      text = let
+        schema = pkgs.gsettings-desktop-schemas;
+        datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+      in  ''
         #!/bin/sh
 
-        ${wayland-gsettings}/bin/wayland-gsettings
+        export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
 
         sync_darkmode() {
           GNOME_SCHEMA="org.gnome.desktop.interface"
@@ -107,13 +113,10 @@ let
 
   ## Global
 
-  gtk3-theme = "adw-gtk";
+  gtk3-theme = "adw-gtk3";
   terminal = "${pkgs.kitty}/bin/kitty";
+  color-scheme.dark = "14141d";
   sway-systemd-target = "sway-session.target";
-
-  color-scheme = {
-    dark = "14141d";
-  };
 
 in {
   ## Packages

@@ -148,7 +148,7 @@ in {
     download = "${config.home.homeDirectory}/downloads";
     music = "${config.home.homeDirectory}/music";
     videos = "${config.home.homeDirectory}/videoarchive";
-  }
+  };
 
 
   ## Git
