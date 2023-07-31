@@ -91,6 +91,7 @@
     neovim
     htop
     openssh
+    killall
 
     # CLI tools    
     fd
