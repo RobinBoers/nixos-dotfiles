@@ -557,13 +557,13 @@ in {
         # when sway is reloaded)
         { command = "systemctl --user start swaybg"; always = true; }
 
-        # Start session & systemd services
-        # (The sway systemd target is automagically started,
-        # we don't have to start it manually here)
-        { command = "gnome-session --systemd"; }
-
         # Cool windows logo
         # { command = "swaymsg rename workspace number 0 to "; }
+
+        # Start GNOME services
+        # (The sway systemd target is automagically started,
+        # we don't have to start it manually here)
+        { command = "systemctl --user start gnome-services.target"; }
       ];
     };
     # Options that couldn't be configured using Home Manager.

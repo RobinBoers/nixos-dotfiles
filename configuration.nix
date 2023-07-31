@@ -232,6 +232,7 @@
 
   systemd.user.services.gnome-keyring = {
     description = "GNOME Keyring";
+    documentation = [ "man:gnome-keyring(1)" "man:gnome-keyring-daemon(1)" ];
     partOf = [ "graphical-session.target" ];
 
     path = with pkgs; [
@@ -244,7 +245,7 @@
     postStart = "systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
     postStop = "systemctl --user unset-environment SSH_AUTH_SOCK";
 
-    wantedBy = [ "gnome-session.target" ];
+    wantedBy = [ "gnome-services.target" ];
    
     serviceConfig = {
       Type = "dbus";
@@ -262,19 +263,41 @@
 
     script = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
 
-    wantedBy = [ "gnome-session.target" ];
+    # Should be refactored (see previous unit).
+    wantedBy = [ "gnome-services.target" ];
 
     serviceConfig = {
       Type = "simple";
     };
   };
 
+  systemd.user.targets.gnome-services = {
+    description = "GNOME services";
+    documentation = [ "man:systemd.special(7)" ];
+    partOf = [ "graphical-session.target" ];
+
+    unitConfig = {
+      RefuseManualStart = false;
+      StopWhenUnneeded = true;
+      Requires = [ "basic.target" ];
+    };
+
+    wants = [
+      "gsd-housekeeping.target"
+      "gsd-xsettings.target"
+      "gsd-datetime.target"
+      "gsd-print-notifications.target"
+      "gsd-rfkill.target"
+      "gsd-usb-protection.target"
+      "gsd-wacom.target"
+      "gsd-wwan.target"
+    ];
+  };
+
 
   ## Fonts
 
-  # I'd rather have these options
-  # in Home Manager as well, but sadly
-  # they are only available system-wide.
+  # I'd rather have these options in home-manager as well, but sadly they are only available system-wide.
 
   fonts = {
     enableDefaultFonts = true;
