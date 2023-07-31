@@ -1,6 +1,10 @@
 { config, pkgs, lib, ... }:
 
 let 
+  ## Global
+  
+  # Colorscheme
+  # (Used in TTY and kitty)
   color-scheme = {
     bg = "0d1117";
     fg = "c9d1d9";
@@ -24,22 +28,27 @@ let
 
 in {
   imports = [
-    ./sway.nix
+    ./desktop.nix
     ./neovim.nix
   ];
 
   home.username = "robin";
   home.homeDirectory = "/home/robin";
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
+  ## Packages
+  
+  nixpkgs.config.allowUnfree = true; # Allow unfree packages
+
   home.packages = with pkgs; [
     # (pkgs.writeShellScriptBin "my-hello" ''
     #   echo "Hello, ${config.home.username}!"
     # '')    
+
+    # CLI tools
+    yt-dlp
+    lazygit
+    thefuck
 
     # Graphical applications
     librewolf
@@ -58,15 +67,15 @@ in {
     "${config.home.homeDirectory}/.local/bin"
   ];
 
+
+  ## Shell
+
   home.sessionVariables = {
     SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket";
     GTK_OVERLAY_SCROLLING = "1";
     ERL_AFLAGS = "-kernel shell_history enabled";
     ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
   };
-
-  # Enable home-manager-help tool
-  manual.html.enable = true;
 
   home.shellAliases = {
     sudo = "doas";
@@ -121,8 +130,10 @@ in {
     '';
   };
 
-  # Configure git identity, aliases
-  # and delta diff.
+
+  ## Git
+
+
   programs.git = {
     enable = true;
 
@@ -132,26 +143,7 @@ in {
       key = "7EBA7FEA236B1DB0";
       signByDefault = true;
     };
-    delta = {
-      enable = true;
-      options = {
-        decorations = {
-          commit-decoration-style = "blue ol";
-          commit-style = "raw";
-          file-style = "omit";
-          hunk-header-decoration-style = "blue box";
-          hunk-header-file-style = "red";
-          hunk-header-style = "file line-number syntax";
-        };
-        features = "decorations";
-        nagivate = "true"; #Use n and N to jump between sections
-        interactive = {
-          keep-plus-minus-markers = false;
-          side-by-side = true;
-          line-numbers = true;
-        };
-      };
-    };
+
     extraConfig = {
       core = {
         hooksPath = "${config.home.homeDirectory}/.githooks";
@@ -175,10 +167,30 @@ in {
         git = "!git";
       };
     };
+
+    # Use delta for 'git diff'
+    delta = {
+      enable = true;
+      options = {
+        decorations = {
+          commit-decoration-style = "blue ol";
+          commit-style = "raw";
+          file-style = "omit";
+          hunk-header-decoration-style = "blue box";
+          hunk-header-file-style = "red";
+          hunk-header-style = "file line-number syntax";
+        };
+        features = "decorations";
+        nagivate = "true"; #Use n and N to jump between sections
+        interactive = {
+          keep-plus-minus-markers = false;
+          side-by-side = true;
+          line-numbers = true;
+        };
+      };
+    };
   };
 
-  # Configure gh CLI tool
-  # for authenticating with GitHub.
   programs.gh = {
     enable = true;
 
@@ -191,6 +203,9 @@ in {
       };
     };
   };
+
+
+  ## Coding
 
   editorconfig = {
     enable = true;
@@ -234,6 +249,21 @@ in {
     ];
   };
 
+
+  ## Passwords
+
+  programs.password-store = {
+    enable = true;
+    package = pkgs.pass-wayland;
+    
+    settings = {
+      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.passwords";
+    };
+  };
+
+
+  ## SSH
+
   programs.ssh = {
     enable = true;
 
@@ -261,30 +291,8 @@ in {
     };
   };
 
-  gtk = {
-    enable = true;
 
-    gtk3 = {
-      bookmarks = [
-        "file://${config.home.homeDirectory}/projects"
-        "file://${config.home.homeDirectory}/projects/qdentity"
-        "file://${config.home.homeDirectory}/pictures/screenshots"
-        "file://${config.home.homeDirectory}/games"
-      ];
-      extraConfig = {
-        gtk-button-images = "1";
-        gtk-menu-images = "1";
-        gtk-enable-event-sounds = "1";
-        gtk-enable-input-feedback-sounds = "1";
-        gtk-toolbar-style = "GTK_TOOLBAR_BOTH";
-        gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
-        gtk-cursor-theme-size = "0";
-        gtk-xft-antialias = "1";
-        gtk-xft-hinting = "1";
-        gtk-xft-hintstyle = "hintful";
-      };
-    };
-  };
+  ## Terminal
 
   programs.kitty = {
     enable = true;
@@ -322,13 +330,6 @@ in {
       color15 = "#${color-scheme.color15}";
     };
     shellIntegration.enableFishIntegration = true;
-  };
-
-  programs.chromium = {
-    enable = true;
-    package = pkgs.ungoogled-chromium;
-
-    extensions = []; # TODO: add later!
   };
 
   programs.bat = {
@@ -406,13 +407,38 @@ in {
     };
   };
 
-  # Password manager
-  programs.password-store = {
+
+  ## Misc
+
+  programs.chromium = {
     enable = true;
-    package = pkgs.pass-wayland;
-    
-    settings = {
-      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.passwords";
+    package = pkgs.ungoogled-chromium;
+
+    extensions = []; # TODO: add later!
+  };
+
+  gtk = {
+    enable = true;
+
+    gtk3 = {
+      bookmarks = [
+        "file://${config.home.homeDirectory}/projects"
+        "file://${config.home.homeDirectory}/projects/qdentity"
+        "file://${config.home.homeDirectory}/pictures/screenshots"
+        "file://${config.home.homeDirectory}/games"
+      ];
+      extraConfig = {
+        gtk-button-images = "1";
+        gtk-menu-images = "1";
+        gtk-enable-event-sounds = "1";
+        gtk-enable-input-feedback-sounds = "1";
+        gtk-toolbar-style = "GTK_TOOLBAR_BOTH";
+        gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
+        gtk-cursor-theme-size = "0";
+        gtk-xft-antialias = "1";
+        gtk-xft-hinting = "1";
+        gtk-xft-hintstyle = "hintful";
+      };
     };
   };
 

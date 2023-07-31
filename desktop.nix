@@ -1,13 +1,15 @@
 { config, pkgs, lib, ... }:
 
 let 
+  ## Custom binaries
+
   wayland-dbus-environment = pkgs.writeTextFile {
     name = "wayland-dbus-environment";
     destination = "/bin/wayland-dbus-environment";
     executable = true;
 
     text = ''
-      dbus-update-activation-environment --systemd SWAYSOCK \
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SWAYSOCK \
         I3SOCK \
         WAYLAND_DISPLAY \
         DISPLAY \
@@ -19,8 +21,8 @@ let
         XAUTHORITY \
         DG_CURRENT_DESKTOP=sway
 
-      systemctl --user stop pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
-      systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
+      ${pkgs.systemd}/bin/systemctl --user stop pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
+      ${pkgs.systemd}/bin/systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
     '';
   };
 
@@ -36,13 +38,47 @@ let
     '';
   };
 
+  wayland-screenshot = pkgs.writeTextFile {
+    name = "wayland-screenshot";
+    destination = "/bin/wayland-screenshot";
+    executable = true;
+
+    text = ''
+      ${pkgs.slurp}/bin/slurp \
+      | ${pkgs.grim}/bin/grim -g - - \
+      | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.wl-clipboard}/bin/wl-paste \
+      > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
+    '';
+  };
+
+  wayland-get-wallpaper = pkgs.writeTextFile = {
+    name = "wayland-get-wallpaper";
+    destination = "/bin/wayland-get-wallpaper";
+    executable = true;
+
+    text = ''
+      ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
+      | ${pkgs.coreutils}/bin/cut -c 9- \
+      | ${pkgs.util-linux}/bin/rev \
+      | ${pkgs.coreutils}/bin/cut -c 2- \
+      | ${pkgs.util-linux}/bin/rev
+    ''
+  };
+
+
+  ## Global
+
   terminal = "${pkgs.kitty}/bin/kitty";
   sway-systemd-target = "sway-session.target";
 
 in {
+  ## Packages
+
   home.packages = with pkgs; [
       wayland-dbus-environment
       wayland-gsettings
+      wayland-screenshot
+      wayland-get-wallpaper
       
       # Utilities
       grim
@@ -51,19 +87,22 @@ in {
       brightnessctl
       playerctl
       wl-clipboard
-
-      # Desktop integration
-      gsettings-desktop-schemas
       
       # Sway services
       swaybg
       autotiling
       swayest-workstyle
       wob
+
+      # Misc
+      gsettings-desktop-schemas # Used in `wayland-gsettings`.
+      sound-theme-freedesktop # Used in mako config.
   ];
 
-  # Don't install foot!!
-  programs.foot.enable = false;
+  programs.foot.enable = false;  # Don't install foot!!
+
+
+  ## Launcher
 
   programs.rofi = {
     enable = true;
@@ -155,6 +194,9 @@ in {
     };
   };
 
+
+  ## Services
+
   # Setup monitor managment
   # (binds to systemd)
   services.kanshi = {
@@ -242,7 +284,7 @@ in {
     events = [
       {
         event = "before-sleep";
-        command = "swaylock --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
+        command = "swaylock --image $(wayland-get-wallpaper)";
       }
     ];
   };
@@ -316,7 +358,7 @@ in {
     };
     Service = {
       Type = "oneshot";
-      ExecStart= "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \* bg $(${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri | ${pkgs.coreutils}/bin/cut -c 9- | ${pkgs.util-linux}/bin/rev | ${pkgs.coreutils}/bin/cut -c 2- | ${pkgs.util-linux}/bin/rev) fill'";
+      ExecStart= "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \* bg $(wayland-get-wallpaper) fill'";
     };
     Install = {
       WantedBy = [ sway-systemd-target ];
@@ -337,6 +379,9 @@ in {
       WantedBy = [ sway-systemd-target ];
     };
   };
+
+
+  ## Window manager
 
   wayland.windowManager.sway = 
     let mod = "Mod4"; in {
@@ -420,7 +465,7 @@ in {
           "${mod}+q" = "kill";
 
           # Screenshotting
-          "${mod}+Shift+s" = "exec slurp | grim -g - - | wl-copy && wl-paste > /home/robin/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')";
+          "${mod}+Shift+s" = "exec wayland-screenshot";
 
           # Screen locking
           "${mod}+l" = "exec swaylock --grace 0 --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
@@ -547,17 +592,14 @@ in {
         bindsym --locked XF86AudioNext           exec playerctl next
         bindsym --locked XF86AudioPrev           exec playerctl previous
 
-        # Volume control (--locked is not available in Home Manager)
-        bindsym --locked XF86AudioRaiseVolume    exec pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
-        bindsym --locked XF86AudioLowerVolume    exec pactl set-sink-volume @DEFAULT_SINK@ -5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
-        bindsym --locked XF86AudioMute           exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-        bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOURCE@ toggle 
-
         # Brightness control (--locked is not available in Home Manager)
         bindsym --locked XF86MonBrightnessUp     exec brightnessctl s +5%
         bindsym --locked XF86MonBrightnessDown   exec brightnessctl s 5%-
     '';
   };
+
+
+  ## Lock screen
 
   programs.swaylock = {
     enable = true;
@@ -578,8 +620,7 @@ in {
       effect-blur = "7x7";
       effect-compose = "50%,70%;center;/tmp/locktext.png";
       # This imsage is generated when sway is started.
-      # It is a little overlay that says "Type password to unlock",
-      # that I kinda like because pwetty.
+      # It is a little overlay that says "Type password to unlock", that I kinda like because pwetty.
 
       separator-color = "00000000";
       inside-color = "00000099";

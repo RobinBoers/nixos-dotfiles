@@ -1,6 +1,5 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# This file contains all system-level configuration.
+# That means it configures hardware, permissions, global settings and important multi-user packages. It does NOT contain any application config, keybindings, or other things that are not essential for a working system and/or for a working desktop. All those settings are managed via home-manager. The only exception to this rule are fonts, since home-manager doesn't provide any way to install or configure fonts, and the TTY setup, since has to always be configured system-wide.
 
 { config, pkgs, lib, ... }:
 
@@ -10,10 +9,14 @@
       ./hardware-configuration.nix
     ];
 
-  # Bootloader.
+  ## Bootloader
+
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = false;
+
+
+  ## Networking
 
   networking.hostName = "nexus";
   networking.networkmanager.enable = true;
@@ -21,11 +24,12 @@
   #networking.defaultGateway = "192.168.1.1";
   #networking.nameservers = [ "8.8.8.8" ];
   
-  # Set your time zone.
+
+  ## Locale
+
   time.timeZone = "Europe/Amsterdam";
 
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "en_US.UTF-8";  # Select internationalisation properties.
 
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "nl_NL.UTF-8";
@@ -39,18 +43,23 @@
     LC_TIME = "nl_NL.UTF-8";
   };
 
-  # Configure keymap in X11
+
+  ## Keymap
+
   services.xserver = {
     layout = "us";
     xkbVariant = "intl";
   };
 
-  # Configure console keymap
   console.keyMap = "us-acentos";
 
-  users.users.root.initialHashedPassword = "";
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  ## Users
+
+  users.mutableUsers = false; # Disable imperatively adding/modifying users using useradd, usermod etc.
+
+  users.users.root.initialHashedPassword = "$y$j9T$bLPCHboiH0gwS3OFClO8c/$I64k3abGdocz4a8rGlB.YSSHquzMXHkfSPZSSAR7aY5";
+
   users.users.robin = {
     isNormalUser = true;
     description = "Robin Boers";
@@ -59,19 +68,14 @@
     packages = with pkgs; [];
   };
 
-  # Disable imperatively adding/modifying users
-  # using useradd, usermod etc.
-  users.mutableUsers = false;
-
-  # Use fish as default shell
-  programs.fish.enable = true;
+  programs.fish.enable = true; # Use fish as default shell
   users.defaultUserShell = pkgs.fish;
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
+  # Packages
+  
+  nixpkgs.config.allowUnfree = true; # Allow unfree packages
+
   environment.systemPackages = with pkgs; [
     # Base utils
     git
@@ -85,9 +89,6 @@
     fd
     ripgrep
     jq
-    yt-dlp
-    lazygit
-    thefuck
     
     # Graphical
     gnome.seahorse
@@ -107,9 +108,13 @@
     libva
   ];
 
-  # Autoupdating
-  system.autoUpgrade.enable = true;
+  system.autoUpgrade.enable = true; # Autoupdating
   system.autoUpgrade.allowReboot = true;
+
+
+  ## Security
+
+  networking.firewall.enable = false; # Disable firewall
 
   # Use doas instead of sudo
   security.doas.enable = true;
@@ -121,60 +126,29 @@
     persist = true;
   }];
 
-  # Disable firewall
-  networking.firewall.enable = false;
+  security.rtkit.enable = true; # Needed for sound to work.
+  security.polkit.enable = true; # Use polkit for access to shutdown, reboot etc.
 
-  # Disable bluetooth
-  hardware.bluetooth.enable = false;
 
-  # Use polkit for access to shutdown, reboot etc.
-  security.polkit.enable = true;
+  ## Hardware
 
-  # TTY environment
-  console = {
-    earlySetup = true;
-    font = "${pkgs.terminus_font}/share/consolefonts/ter-112n.psf.gz";
-    packages = with pkgs; [ terminus_font ];
-  };  
+  
+  hardware.bluetooth.enable = false; # Disable bluetooth
 
   # Sound
   sound.enable = true;
-  security.rtkit.enable = true;
+  
+  # Keyboard shortcuts
+  # (They use actkbd, so they also work in TTY)
+  sound.mediaKeys.enable = true;
+
+  # Use pipewire instead of pulse
   hardware.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
     jack.enable = true;
-  };
-
-  # I'd rather have these options
-  # in Home Manager as well, but sadly
-  # they are only available system-wide.
-
-  # Fonts
-  fonts = {
-    enableDefaultFonts = true;
-    fontDir.enable = true;
-
-    fonts = with pkgs; [
-      inter
-      libertinus
-      whatsapp-emoji-font
-      jetbrains-mono
-      fira-code
-      ibm-plex
-      font-awesome
-      noto-fonts
-    ];
-    
-    fontconfig = {
-      defaultFonts = {
-        serif = [ "Libertinus" ];
-        sansSerif = [ "Inter" ];
-        monospace = [ "Jetbrains Mono" "Fira Code" "IMB Plex Mono" ];
-      };
-    };
   };
 
   # OpenGL
@@ -186,8 +160,7 @@
   };
 
 
-  # Graphical session
-  # Sway + GNOME
+  ## Graphical session (Sway + GNOME services)
 
   programs.sway = {
     enable = true;
@@ -200,10 +173,8 @@
       glib # gsettings support
       gnome.gnome-session
       gnome.gnome-control-center
-      gnome.dconf-editor
       qt5.qtwayland 
       polkit_gnome
-      sound-theme-freedesktop
     ];
     extraSessionCommands = ''
       export NIXOS_OZONE_WL=1
@@ -215,21 +186,16 @@
     '';
   };
   
+  # Desktop integration
   xdg.mime.enable = true;
   xdg.icons.enable = true;
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;
-
-  # GTK portal needed to make GTK apps happy
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  xdg.portal.extraPortals = 
+    [ pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
 
   # GNOME services
-  # To make them start in sway, append `gnome-session --systemd`
-  # to the end of your `.config/sway/config`.
-  services.gvfs.enable = true;
   services.gnome.gnome-settings-daemon.enable = true;
-  services.gnome.glib-networking.enable = true;
-  services.gnome.gnome-browser-connector.enable = true;
   services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files."
 
   # Keyring & polkit
@@ -284,6 +250,45 @@
   services.udisks2.enable = true;
   services.dbus.enable = true;
   services.avahi.enable = true;
+
+
+  ## Fonts
+
+  # I'd rather have these options
+  # in Home Manager as well, but sadly
+  # they are only available system-wide.
+
+  fonts = {
+    enableDefaultFonts = true;
+    fontDir.enable = true;
+
+    fonts = with pkgs; [
+      inter
+      libertinus
+      whatsapp-emoji-font
+      jetbrains-mono
+      fira-code
+      ibm-plex
+      font-awesome
+      noto-fonts
+    ];
+    
+    fontconfig = {
+      defaultFonts = {
+        serif = [ "Libertinus" ];
+        sansSerif = [ "Inter" ];
+        monospace = [ "Jetbrains Mono" "Fira Code" "IMB Plex Mono" ];
+      };
+    };
+  };
+
+  # Use terminus in TTY
+  console = {
+    earlySetup = true;
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-118n.psf.gz";
+    packages = with pkgs; [ terminus_font ];
+  };  
+
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

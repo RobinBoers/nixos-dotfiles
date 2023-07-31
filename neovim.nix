@@ -1,6 +1,10 @@
 { config, pkgs, lib, ... }:
 
 {
+  ## Neovim
+
+  # I split this into a seperate file because my neovim config is literally giant, and it was taking way to long to scroll up and down my home.nix file while it was still in there.
+
   programs.neovim = {
     enable = true; 
 
