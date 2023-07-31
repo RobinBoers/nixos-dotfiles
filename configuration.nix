@@ -92,6 +92,7 @@
     htop
     openssh
     killall
+    gnupg
 
     # CLI tools    
     fd
