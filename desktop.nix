@@ -51,7 +51,7 @@ let
     '';
   };
 
-  wayland-get-wallpaper = pkgs.writeTextFile = {
+  wayland-get-wallpaper = pkgs.writeTextFile {
     name = "wayland-get-wallpaper";
     destination = "/bin/wayland-get-wallpaper";
     executable = true;
@@ -62,7 +62,7 @@ let
       | ${pkgs.util-linux}/bin/rev \
       | ${pkgs.coreutils}/bin/cut -c 2- \
       | ${pkgs.util-linux}/bin/rev
-    ''
+    '';
   };
 
 
