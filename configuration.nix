@@ -294,6 +294,16 @@
     ];
   };
 
+  # TODO(robin): make this a for loop?
+  systemd.user.services."gsd-housekeeping.target".enable = true;
+  systemd.user.services."gsd-xsettings.target".enable = true
+  systemd.user.services."gsd-datetime.target".enable = true
+  systemd.user.services."gsd-print-notifications.target".enable = true
+  systemd.user.services."gsd-rfkill.target".enable = true
+  systemd.user.services."gsd-usb-protection.target".enable = true
+  systemd.user.services."gsd-wacom.target".enable = true
+  systemd.user.services."gsd-wwan.target".enable = true
+  
 
   ## Fonts
 
