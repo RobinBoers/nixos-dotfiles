@@ -51,6 +51,10 @@ in {
     thefuck
 
     # Graphical applications
+    gnome.nautilus
+    libreoffice
+    xarchiver
+    feh
     librewolf
     ungoogled-chromium
     baobab

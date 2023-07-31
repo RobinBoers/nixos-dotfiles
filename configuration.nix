@@ -88,14 +88,7 @@
     # CLI tools    
     fd
     ripgrep
-    jq
-    
-    # Graphical
-    gnome.seahorse
-    gnome.nautilus
-    libreoffice
-    xarchiver
-    feh
+    jq    
 
     # Theming
     adw-gtk3
@@ -137,10 +130,7 @@
 
   # Sound
   sound.enable = true;
-  
-  # Keyboard shortcuts
-  # (They use actkbd, so they also work in TTY)
-  sound.mediaKeys.enable = true;
+  sound.mediaKeys.enable = true; # TTY-compatible keyboard shortcuts
 
   # Use pipewire instead of pulse
   hardware.pulseaudio.enable = false;
@@ -149,6 +139,30 @@
     alsa.enable = true;
     pulse.enable = true;
     jack.enable = true;
+  };
+
+  # Brightness
+  # Replace with `programs.light.brightnessKeys = true;` 
+  # once https://github.com/NixOS/nixpkgs/pull/60804 gets merged.
+  programs.light.enable = true;
+  services.actkbd = {
+    enable = true;
+    bindings = let
+      light = "${pkgs.light}/bin/light";
+      step = toString config.programs.light.brightnessKeys.step;
+    in [
+      {
+        keys = [ 224 ];
+        events = [ "key" ];
+        # Use minimum brightness 0.1 so the display won't go totally black.
+        command = "${light} -N 0.1 && ${light} -U ${step}";
+      }
+      {
+        keys = [ 225 ];
+        events = [ "key" ];
+        command = "${light} -A ${step}";
+      }
+    ];
   };
 
   # OpenGL
@@ -187,6 +201,10 @@
   };
   
   # Desktop integration
+  services.dbus.enable = true;
+  services.xserver.updateDbusEnvironment = true; # Make dbus work in Xwayland?
+  services.udisks2.enable = true;
+  services.avahi.enable = true;
   xdg.mime.enable = true;
   xdg.icons.enable = true;
   xdg.portal.enable = true;
@@ -194,14 +212,16 @@
   xdg.portal.extraPortals = 
     [ pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
 
-  # GNOME services
+  # Settings
+  programs.dconf.enable = true;
   services.gnome.gnome-settings-daemon.enable = true;
-  services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files."
 
   # Keyring & polkit
+  programs.seahorse.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
   security.pam.services.passwd.enableGnomeKeyring = true;
+  services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
 
   systemd.user.services.gnome-keyring = {
     description = "GNOME Keyring";
@@ -241,15 +261,6 @@
       Type = "simple";
     };
   };
-
-  # Make dbus work in Xwayland?
-  services.xserver.updateDbusEnvironment = true;
-
-  # Misc
-  programs.dconf.enable = true;
-  services.udisks2.enable = true;
-  services.dbus.enable = true;
-  services.avahi.enable = true;
 
 
   ## Fonts

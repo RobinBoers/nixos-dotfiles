@@ -84,7 +84,6 @@ in {
       grim
       slurp
       clipman
-      brightnessctl
       playerctl
       wl-clipboard
       
@@ -591,10 +590,6 @@ in {
         bindsym --locked XF86AudioPause          exec playerctl pause
         bindsym --locked XF86AudioNext           exec playerctl next
         bindsym --locked XF86AudioPrev           exec playerctl previous
-
-        # Brightness control (--locked is not available in Home Manager)
-        bindsym --locked XF86MonBrightnessUp     exec brightnessctl s +5%
-        bindsym --locked XF86MonBrightnessDown   exec brightnessctl s 5%-
     '';
   };
 
