@@ -231,7 +231,7 @@
   services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
 
   systemd.user.services.gnome-keyring = {
-    description = "GNOME Keyring";
+    description = "GNOME Keyring: service that stores your passwords and secrets";
     documentation = [ "man:gnome-keyring(1)" "man:gnome-keyring-daemon(1)" ];
     partOf = [ "graphical-session.target" ];
 
@@ -263,7 +263,6 @@
 
     script = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
 
-    # Should be refactored (see previous unit).
     wantedBy = [ "gnome-services.target" ];
 
     serviceConfig = {
@@ -282,6 +281,16 @@
       Requires = [ "basic.target" ];
     };
 
+    # This should probably be refactored. The `sway-session.target` is a something configured and managed by home-manager. We shouldn't assume it is enabled and set to this value. Instead this config should be moved to home-manager (but that would break the setup, and the GNOME services are a system-level thing) or this should be started from the Sway config somehow (instead of the other way around, aka depending on the sway session here).
+
+    # I tried to run `systemctl start --user gnome-services.target` in the sway autostart section, but that resulted in 'display not found' errors for GNOME polkit.
+
+    wantedBy = [ "sway-session.target" ];
+
+    # Starting GSD doesn't work unfortunately. NixOS masks the GSD systemd files for some reason, probably to prevent hacky setups like this. I tried unmasking using `systemd.user.targets.<name>.enable = true;`, but that didn't work out. I just got the message to run `systemctl --user daemon-reload`, and that didn't do anything (it didn't unmask the units and it also didn't make the message go away).
+
+    # I'll let this be for the moment.
+
     wants = [
       "gsd-housekeeping.target"
       "gsd-xsettings.target"
@@ -292,18 +301,7 @@
       "gsd-wacom.target"
       "gsd-wwan.target"
     ];
-  };
-
-  # TODO(robin): make this a for loop?
-  systemd.user.targets."gsd-housekeeping.target".enable = true;
-  systemd.user.targets."gsd-xsettings.target".enable = true;
-  systemd.user.targets."gsd-datetime.target".enable = true;
-  systemd.user.targets."gsd-print-notifications.target".enable = true;
-  systemd.user.targets."gsd-rfkill.target".enable = true;
-  systemd.user.targets."gsd-usb-protection.target".enable = true;
-  systemd.user.targets."gsd-wacom.target".enable = true;
-  systemd.user.targets."gsd-wwan.target".enable = true;
-  
+  };  
 
   ## Fonts
 
@@ -339,6 +337,7 @@
     font = "${pkgs.terminus_font}/share/consolefonts/ter-118n.psf.gz";
     packages = with pkgs; [ terminus_font ];
   };  
+
 
 
   # Some programs need SUID wrappers, can be configured further or are
