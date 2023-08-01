@@ -149,7 +149,6 @@ in {
     GTK_OVERLAY_SCROLLING = "1";
     ERL_AFLAGS = "-kernel shell_history enabled";
     ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
-    NEWT_COLORS = newt-color-scheme;
   };
 
   home.shellAliases = {
@@ -185,6 +184,9 @@ in {
       # Enable amazing 'fuck' command
       thefuck --alias | source
 
+      # home-manager fucks up if I put this in shellAliases
+      export NEWT_COLORS="${newt-color-scheme}"
+
       # Fancy TTY color scheme.
       echo -e "
         \e]P0${color-scheme.color0}
@@ -204,6 +206,7 @@ in {
         \e]PE${color-scheme.color14}
         \e]PF${color-scheme.color15}
         "
+
       clear
     '';
   };
