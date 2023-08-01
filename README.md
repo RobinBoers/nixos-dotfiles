@@ -2,12 +2,13 @@
 
 My NixOS configuration.
 
-_If you came here via an link from Reddit, you're probably looking for my
-[old dotfiles](https://github.com/RobinBoers/dotfiles-legacy)._
+> Note:  
+> If you came here via an link from Reddit, you're probably looking for my
+> [old dotfiles](https://github.com/RobinBoers/dotfiles-legacy).
 
 ## Structure
 
-[`configuration.nix``](configuration.nix) contains all system-level configuration.
+[`configuration.nix`](configuration.nix) contains all system-level configuration.
 
 That means it configures hardware, permissions, global settings and important multi-user packages.
 It does NOT contain any application config, keybindings, or other things that are not essential for a
@@ -26,9 +27,9 @@ in gsettings, and changes the GTK3 theme to `adw-gtk3-dark` if libadwaita dark-m
 ## Desktop
 
 I use the [Sway] window manager that I integrated with GNOME services, similar to my old
-[sway-gnome](https://github.com/RobinBoers/sway-gnome) setup on Arch Linux.
+[`sway-gnome`](https://github.com/RobinBoers/sway-gnome) setup on Arch Linux.
 
 The Sway + GNOME services is enabled system-wide, but the configuration for sway, and
-its own services (mako, kanshi etc.) is managed on user-level using Home Manager.
+its own services (`mako`, `kanshi` etc) is managed on user-level using Home Manager.
 
 Xwayland is enabled by default. Because, let's be honest. Nothing is gonna work without it.
