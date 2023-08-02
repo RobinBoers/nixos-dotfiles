@@ -71,6 +71,6 @@ git clone git.geheimesite.nl:meta/passwords .passwords
 ## Setup keyrings & other authentication
 
 ```shell
-git clone --bare git.geheimesite.nl:meta/secrets ~/.secrets
+git clone --bare gcrypt::git.geheimesite.nl:meta/secrets ~/.secrets
 secrets checkout
 ```

@@ -119,6 +119,7 @@ in {
     yt-dlp
     lazygit
     thefuck
+    git-remote-gcrypt
 
     # Graphical applications
     gnome.nautilus
