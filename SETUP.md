@@ -72,5 +72,7 @@ git clone git.geheimesite.nl:meta/passwords .passwords
 
 ```shell
 git clone --bare gcrypt::git.geheimesite.nl:meta/secrets ~/.secrets
+secrets config remote.origin.gcrypt-participants "CBDF033DB0E73C541469A284B624C660CDF0AB8A"
+secrets config remote.origin.gcrypt-signingkey "CBDF033DB0E73C541469A284B624C660CDF0AB8A"
 secrets checkout
 ```
