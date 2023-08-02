@@ -164,7 +164,7 @@ in {
 
     # Secrets management
     secrets = "git --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
-    secrets-manage = "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
+    lsecrets = "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
 
     # Shortcuts
     rm = "rm -ri";
