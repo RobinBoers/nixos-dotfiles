@@ -150,8 +150,8 @@ in {
         background-color = mkLiteral "#285577";
       };
       "window" = {
-        anchor = "center";
-        location = "north";
+        anchor = mkLiteral "center";
+        location = mkLiteral "north";
         border = 2;
         border-color = mkLiteral "#4C7899";
         padding = 5;
@@ -233,7 +233,7 @@ in {
         outputs = [
           {
             criteria = "Virtual-1";
-            mode = "1920x1090";
+            mode = "1920x1080";
             position = "0,0";
           }
         ];
@@ -242,8 +242,9 @@ in {
         outputs = [
           {
             criteria = "eDP-1";
-            mode = "1920x1090";
+            mode = "1920x1080";
             position = "0,0";
+            status = "enable";
           }          
         ];
       };
@@ -256,8 +257,9 @@ in {
           }
           {
             criteria = "eDP-1";
-            mode = "1920x1090";
+            mode = "1920x1080";
             position = "0,1080";
+            status = "enable";
           }
         ];
       };
@@ -265,8 +267,9 @@ in {
         outputs = [
           {
             criteria = "eDP-1";
-            mode = "1920x1090";
+            mode = "1920x1080";
             position = "5120,0";
+            status = "enable";
           }
           {
             criteria = "DP-1";
@@ -288,11 +291,6 @@ in {
           }
           {
             criteria = "DP-1";
-            mode = "2560x1440";
-            position = "2560,0";
-          }
-          {
-            criteria = "HDMI-A-1";
             mode = "2560x1440";
             position = "0,0";
           }
@@ -440,9 +438,8 @@ in {
           dwt = "disabled";
         };
         "*" = {
-          scroll_factor = "0.2"; # Only for VMs
           xkb_layout = "us";
-          xkb_variant = "intl";
+          #xkb_variant = "intl";
         };
       };
       focus = {
@@ -504,6 +501,9 @@ in {
 
           # Super+q to close window
           "${mod}+q" = "kill";
+
+          # Run prompt
+          "${mod}+r" = "exec rofi -show run";
 
           # Screenshotting
           "${mod}+Shift+s" = "exec wayland-screenshot";

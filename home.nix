@@ -121,6 +121,10 @@ in {
     thefuck
     git-remote-gcrypt
 
+    # Languages
+    elixir_1_15
+    nixfmt
+
     # Graphical applications
     gnome.nautilus
     libreoffice
@@ -146,10 +150,11 @@ in {
   ## Shell
 
   home.sessionVariables = {
-    SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket";
+    #SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket";
     GTK_OVERLAY_SCROLLING = "1";
     ERL_AFLAGS = "-kernel shell_history enabled";
     ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
+    DIRENV_LOG_FORMAT = ""; # Disable annoying direnv output
   };
 
   home.shellAliases = {
@@ -188,6 +193,11 @@ in {
       # home-manager fucks up if I put this in shellAliases
       export NEWT_COLORS="${newt-color-scheme}"
 
+      export GTK_OVERLAY_SCROLLING=1;
+      export ERL_AFLAGS="-kernel shell_history enabled"
+      export ELIXIR_ERL_OPTIONS="-kernel start_pg true shell_history enabled"
+      export DIRENV_LOG_FORMAT="" # Disable annoying direnv output
+
       # Fancy TTY color scheme.
       echo -e "
         \e]P0${color-scheme.color0}
@@ -212,6 +222,11 @@ in {
     '';
   };
 
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
 
   ## XDG directories
 
@@ -219,6 +234,8 @@ in {
     enable = true;
     createDirectories = false;
     documents = "${config.home.homeDirectory}/docs";
+    desktop = "${config.home.homeDirectory}/docs";
+    templates = "${config.home.homeDirectory}/docs";
     pictures = "${config.home.homeDirectory}/pictures";
     download = "${config.home.homeDirectory}/downloads";
     music = "${config.home.homeDirectory}/music";
@@ -249,7 +266,7 @@ in {
         rebase = false;
         ff = "only";
       };
-      aliases = {
+      alias = {
         co = "checkout";
         br = "branch";
         ci = "commit";
@@ -300,6 +317,7 @@ in {
 
   services.gpg-agent = {
     enable = true;
+    enableSshSupport = true;
     enableFishIntegration = true;
     pinentryFlavor = "gnome3";
   };
@@ -323,11 +341,20 @@ in {
     };
   };
 
-  programs.vscode = {
+  programs.vscode = 
+    let 
+      system = builtins.currentSystem;
+      extensions =
+        (import (builtins.fetchGit {
+          url = "https://github.com/nix-community/nix-vscode-extensions";
+          ref = "refs/heads/master";
+          rev = "c43d9089df96cf8aca157762ed0e2ddca9fcd71e";
+        })).extensions.${system};      
+    in {
     enable = true;
-    mutableExtensionsDir = false; # Don't let VSCode manage extensions.
-    extensions = with pkgs.vscode-extensions; [
-      elixir-lsp.vscode-elixir-ls
+    enableUpdateCheck = false;
+    mutableExtensionsDir = false; # Don't let VSCode itself manage extensions, but instead force extensions to be installed via this file.
+    extensions = with extensions.vscode-marketplace; [
       github.github-vscode-theme
       eamodio.gitlens
       ms-vsliveshare.vsliveshare
@@ -346,7 +373,139 @@ in {
       piousdeer.adwaita-theme
       dbaeumer.vscode-eslint
       rust-lang.rust-analyzer
+      miguelsolorio.fluent-icons
+      tombonnike.vscode-status-bar-format-toggle
+      jakebecker.elixir-ls
     ];
+    userSettings = {
+      # Global
+      "window"."restoreWindows" = "folders";
+      "editor"."wordWrap" = "on";
+      "editor"."formatOnSave" = true;
+      "editor"."formatOnPaste" = true;
+      "editor"."formatOnType" = true;
+      "editor"."tabSize" = 2;
+
+      # Theming / setup
+      "workbench"."colorTheme" = "Adwaita Light";
+      "editor"."fontFamily" = "monospace";
+      "editor"."fontLigatures" = true;
+      "editor"."fontSize" = 23;
+      "editor"."bracketPairColorization"."enabled" = false;
+      "terminal"."integrated"."fontSize" = 23;
+      "workbench"."iconTheme" = "vscode-icons";
+      "workbench"."productIconTheme" = "fluent-icons";
+      "window"."nativeTabs" = true;
+      "window"."title" = "\${dirty}\${activeEditorLong}\${separator}\${appName}\${separator}\${remoteName}";
+      "window"."titleSeparator" = " — ";
+      "window"."menuBarVisibility" = "compact";
+      "window"."titleBarStyle" = "custom";
+      "editor"."cursorBlinking" = "phase";
+      "editor"."cursorSmoothCaretAnimation" = "on";
+      "window"."zoomLevel" = -1;
+
+      # Base configuration / sensible defaults
+      "workbench"."editor"."untitled"."experimentalLanguageDetection" = true;
+      "workbench"."tips"."enabled" = false;
+      "redhat"."telemetry"."enabled" = false;
+      "security"."workspace"."trust"."untrustedFiles" = "open";
+      "terminal"."integrated"."enableMultiLinePasteWarning" = false;
+      "terminal"."integrated"."persistentSessionReviveProcess" = "never";
+      "git"."enableCommitSigning" = true;
+      "editor"."unicodeHighlight"."allowedCharacters" = {
+        "❯" = true;
+        "❮" = true;
+      };
+      "markdownlint"."config" = {
+        "MD030" = false;
+        "MD045" = false;
+        "MD036" = false;
+        "MD026" = false;
+        "MD041" = false;
+        "MD033" = false;
+        "MD024" = false;
+      };
+      "editor"."selectionClipboard" = false;
+      "editor"."defaultFormatter" = "esbenp.prettier-vscode";
+      "rust-analyzer"."checkOnSave"."command" = "clippy";
+      "colorize"."include" = ["*"];
+      "css"."lint"."zeroUnits" = "warning";
+      "css"."lint"."ieHack" = "warning";
+      "css"."lint"."unknownAtRules" = "ignore";
+      "remoteHub"."commitDirectlyWarning" = "off";
+      "explorer"."confirmDelete" = false;
+      "git"."autofetch" = true;
+      "git"."enableSmartCommit" = true;
+      "diffEditor"."ignoreTrimWhitespace" = false;
+      "explorer"."confirmDragAndDrop" = false;
+      "workbench"."startupEditor" = "none";
+      "git"."confirmSync" = false;
+      "git"."openRepositoryInParentFolders" = "always";
+      "editor"."inlayHints"."enabled" = "off";
+
+      # Extensions
+      "gitlens"."hovers"."currentLine"."over" = "line";
+      "gitlens"."currentLine"."enabled" = false;
+      "gitlens"."defaultDateShortFormat" = "D MMMM YYYY";
+      "gitlens"."defaultTimeFormat" = "H:MM";
+      "gitlens"."defaultDateFormat" = "D MMMM YYYY; H:MM";
+      "gitlens"."codeLens"."enabled" = false;
+      #"python"."defaultInterpreterPath" = "/bin/python3";
+      "cSpell"."enabled" = false;
+      "elixirLS"."suggestSpecs" = false;
+      "elixirLS"."dialyzerEnabled" = false;
+      "elixirLS"."fetchDeps" = false;
+      "vsicons"."dontShowNewVersionMessage" = true;
+      "[json]" = {
+        "editor"."defaultFormatter" = "vscode.json-language-features";
+      };
+      "[xml]" = {
+        "editor"."defaultFormatter" = "redhat.vscode-xml";
+      };
+      "[elixir]" = {
+        "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
+      };
+      "[phoenix-heex]" = {
+        "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
+      };
+      "[eex]" = {
+        "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
+      };
+      "[css]" = {
+        "editor"."defaultFormatter" = "esbenp.prettier-vscode";
+      };
+      "[xsl]" = {
+        "editor"."defaultFormatter" = "redhat.vscode-xml";
+      };
+      "[python]" = {
+        "editor"."formatOnType" = true;
+      };
+      "[toml]" = {
+        "editor"."defaultFormatter" = "tamasfe.even-better-toml";
+      };
+      "emmet"."includeLanguages" = {
+        "phoenix-heex" = "html";
+      };
+      "tailwindCSS"."includeLanguages" = {
+        "elixir" = "html";
+        "phoenix-heex" = "html";
+      };
+      "yaml"."validate" = false;
+      "files"."associations" = {
+        "**/"."i3/config" = "i3";
+        "**/i3/config" = "i3";
+        "**/"."sway/config" = "i3";
+        "**/sway/config" = "i3";
+        "**/"."i3status/config" = "i3";
+        "**/i3status/config" = "i3";
+        "**/"."i3lock/config" = "i3";
+        "**/i3lock/config" = "i3";
+        "**/"."swaylock/config" = "i3";
+        "**/swaylock/config" = "i3";
+        "*"."heex" = "phoenix-heex";
+        "*"."grape" = "dart";
+      };
+    };
   };
 
 
@@ -429,7 +588,7 @@ in {
       color14 = "#${color-scheme.color14}";
       color15 = "#${color-scheme.color15}";
     };
-    shellIntegration.enableFishIntegration = true;
+    #shellIntegration.enableFishIntegration = true;
   };
 
   programs.bat = {
