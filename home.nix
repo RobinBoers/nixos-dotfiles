@@ -127,7 +127,7 @@ in {
     # Graphical applications
     gnome.nautilus
     libreoffice
-    xarchiver
+    gnome.file-roller
     feh
     librewolf
     ungoogled-chromium
