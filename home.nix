@@ -119,6 +119,7 @@ in {
     lazygit
     thefuck
     git-remote-gcrypt
+    imagemagick
 
     # Languages
     elixir_1_15
@@ -138,6 +139,10 @@ in {
     spotify
     discord
     minecraft
+
+    # Theming
+    adw-gtk3
+    vanilla-dmz
   ];
 
   # Append .local/bin to the path
@@ -351,7 +356,7 @@ in {
     extensions = (import (builtins.fetchGit {
       url = "https://github.com/nix-community/nix-vscode-extensions";
       ref = "refs/heads/master";
-      rev = "c43d9089df96cf8aca157762ed0e2ddca9fcd71e";
+      rev = "1c6da5a92510184f159dc8e73eb340331166134d";
     })).extensions.${system};
   in {
     enable = true;
@@ -686,6 +691,11 @@ in {
     };
   };
 
+  gtk.cursorTheme = {
+    package = pkgs.vanilla-dmz;
+    name = "Vanilla-DMZ";
+  };
+
   home.file = {
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
@@ -698,6 +708,9 @@ in {
       #!/bin/sh
       bix pre-push
     '';
+
+     ".local/share/icons/default".source = 
+        "${pkgs.vanilla-dmz}/share/icons/Vanilla-DMZ"; 
 
     ".config/fish/completions/sd.fish".text = ''
      # Completions for the custom Script Directory (sd) script

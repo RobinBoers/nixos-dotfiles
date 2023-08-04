@@ -106,7 +106,6 @@ in {
     playerctl
     wl-clipboard
     pulseaudio
-    imagemagick
 
     # Sway services
     swaybg
