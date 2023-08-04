@@ -106,6 +106,7 @@ in {
     playerctl
     wl-clipboard
     pulseaudio
+    imagemagick
 
     # Sway services
     swaybg
@@ -354,14 +355,13 @@ in {
       Description = "Wallpaper setter for sway";
       Documentation = [ "man:swaybg(1)" ];
       PartOf = "graphical-session.target";
-      After = sway-systemd-target;
     };
     Service = {
       Type = "oneshot";
       ExecStart =
         "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
     };
-    Install = { WantedBy = [ sway-systemd-target ]; };
+    Install = { Requires = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.gtk3-darkmode-daemon = {
@@ -588,11 +588,11 @@ in {
         # TODO(robin): replace this with a time-based daemon later.
         {
           command =
-            "gsettings set org.gnome.desktop.interface.gtk-theme '${gtk3-theme}'";
+            "gsettings set org.gnome.desktop.interface gtk-theme '${gtk3-theme}'";
         }
         {
           command =
-            "gsettings set org.gnome.desktop.interface.color-scheme 'default'";
+            "gsettings set org.gnome.desktop.interface color-scheme 'default'";
         }
 
         # Cool windows logo for first workspace
@@ -643,6 +643,7 @@ in {
 
     settings = {
       ignore-empty-password = true;
+      show-failed-attempts = true;
       clock = true;
       font = "Liberation-Sans";
       timestr = "%H:%M";
@@ -662,7 +663,7 @@ in {
       separator-color = "00000000";
       inside-color = "00000099";
       inside-clear-color = "FFD20400";
-      inside-caps-color = "009DDC00";
+      inside-caps-lock-color = "009DDC00";
       inside-ver-color = "D9D8d800";
       inside-wrong-color = "EE2E2400";
       ring-color = "231F20D9";
@@ -680,7 +681,7 @@ in {
       text-wrong-color = "EE2E400";
       bs-hl-color = "EE2E24FF";
       caps-lock-key-hl-color = "FFD204FF";
-      caps-lock-key-bs-color = "EE2E24FF";
+      caps-lock-bs-hl-color = "EE2E24FF";
       disable-caps-lock-text = true;
       text-caps-lock-color = "009ddc";
     };
