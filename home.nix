@@ -1,8 +1,8 @@
 { config, pkgs, lib, ... }:
 
-let 
+let
   ## Global
-  
+
   # Colorscheme
   # (Used in TTY and kitty)
   color-scheme = {
@@ -100,18 +100,17 @@ let
     menubox_border2_color = border_color
   '';
 
+  home-directory = "/home/robin";
+  script-directory = "${home-directory}/sd";
+
 in {
-  imports = [
-    ./desktop.nix
-    ./neovim.nix
-  ];
+  imports = [ ./desktop.nix ./neovim.nix ];
 
   home.username = "robin";
-  home.homeDirectory = "/home/robin";
-
+  home.homeDirectory = home-directory;
 
   ## Packages
-  
+
   nixpkgs.config.allowUnfree = true; # Allow unfree packages
 
   home.packages = with pkgs; [
@@ -142,20 +141,9 @@ in {
   ];
 
   # Append .local/bin to the path
-  home.sessionPath = [
-    "${config.home.homeDirectory}/.local/bin"
-  ];
-
+  home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
   ## Shell
-
-  home.sessionVariables = {
-    #SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket";
-    GTK_OVERLAY_SCROLLING = "1";
-    ERL_AFLAGS = "-kernel shell_history enabled";
-    ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
-    DIRENV_LOG_FORMAT = ""; # Disable annoying direnv output
-  };
 
   home.shellAliases = {
     sudo = "doas";
@@ -168,8 +156,10 @@ in {
     ":Q" = "exit";
 
     # Secrets management
-    secrets = "git --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
-    lsecrets = "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
+    secrets =
+      "git --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
+    lsecrets =
+      "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
 
     # Shortcuts
     rm = "rm -ri";
@@ -181,44 +171,48 @@ in {
 
   programs.fish = {
     enable = true;
-    
+
     shellAliases = config.home.shellAliases;
     shellInit = ''
-      # Disable welcome message when logging in
+      # Disable welcome message
       set fish_greeting
 
       # Enable amazing 'fuck' command
       thefuck --alias | source
 
-      # home-manager fucks up if I put this in shellAliases
+      # Environment/session variables
       export NEWT_COLORS="${newt-color-scheme}"
-
+      export DEFAULT_BROWSER="${pkgs.librewolf}/bin/qutebrowser"    # Needed for Electron apps
+      export SSH_AUTH_SOCK=/run/user/1000/keyring/ssh    # See gnome-keyring section
+      
       export GTK_OVERLAY_SCROLLING=1;
       export ERL_AFLAGS="-kernel shell_history enabled"
       export ELIXIR_ERL_OPTIONS="-kernel start_pg true shell_history enabled"
-      export DIRENV_LOG_FORMAT="" # Disable annoying direnv output
+      export DIRENV_LOG_FORMAT=""   # Disable annoying direnv output
 
       # Fancy TTY color scheme.
-      echo -e "
-        \e]P0${color-scheme.color0}
-        \e]P1${color-scheme.color1}
-        \e]P2${color-scheme.color2}
-        \e]P3${color-scheme.color3}
-        \e]P4${color-scheme.color4}
-        \e]P5${color-scheme.color5}
-        \e]P6${color-scheme.color6}
-        \e]P7${color-scheme.color7}
-        \e]P8${color-scheme.color8}
-        \e]P9${color-scheme.color9}
-        \e]PA${color-scheme.color10}
-        \e]PB${color-scheme.color11}
-        \e]PC${color-scheme.color12}
-        \e]PD${color-scheme.color13}
-        \e]PE${color-scheme.color14}
-        \e]PF${color-scheme.color15}
-        "
+      if test $TERM = "linux"
+        echo -e "
+          \e]P0${color-scheme.color0}
+          \e]P1${color-scheme.color1}
+          \e]P2${color-scheme.color2}
+          \e]P3${color-scheme.color3}
+          \e]P4${color-scheme.color4}
+          \e]P5${color-scheme.color5}
+          \e]P6${color-scheme.color6}
+          \e]P7${color-scheme.color7}
+          \e]P8${color-scheme.color8}
+          \e]P9${color-scheme.color9}
+          \e]PA${color-scheme.color10}
+          \e]PB${color-scheme.color11}
+          \e]PC${color-scheme.color12}
+          \e]PD${color-scheme.color13}
+          \e]PE${color-scheme.color14}
+          \e]PF${color-scheme.color15}
+          "
 
-      clear
+        clear
+      end
     '';
   };
 
@@ -227,8 +221,7 @@ in {
     nix-direnv.enable = true;
   };
 
-
-  ## XDG directories
+  ## XDG directories & default applications
 
   xdg.userDirs = {
     enable = true;
@@ -242,6 +235,17 @@ in {
     videos = "${config.home.homeDirectory}/videoarchive";
   };
 
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "text/html" = "librewolf.desktop";
+      "application/pdf" = "librewolf.desktop";
+      "x-scheme-handler/http" = "librewolf.desktop";
+      "x-scheme-handler/https" = "librewolf.desktop";
+      "x-scheme-handler/about" = "librewolf.desktop";
+      "x-scheme-handler/unknown" = "librewolf.desktop";
+    };
+  };
 
   ## Git
 
@@ -256,12 +260,8 @@ in {
     };
 
     extraConfig = {
-      core = {
-        hooksPath = "${config.home.homeDirectory}/.githooks";
-      };
-      init = {
-        defaultBranch = "master";
-      };
+      core = { hooksPath = "${config.home.homeDirectory}/.githooks"; };
+      init = { defaultBranch = "master"; };
       pull = {
         rebase = false;
         ff = "only";
@@ -272,9 +272,11 @@ in {
         ci = "commit";
         st = "status";
         cp = "cherry-pick";
-        h = "log --graph --date=default-local --pretty=format:'%C(yellow)%h%C(reset) %C(green)%cd%C(reset) %C(blue)%an%C(reset)%C(red)%d%C(reset) %s'";
+        h =
+          "log --graph --date=default-local --pretty=format:'%C(yellow)%h%C(reset) %C(green)%cd%C(reset) %C(blue)%an%C(reset)%C(red)%d%C(reset) %s'";
         ha = "h --all";
-        prune-br = "! git fetch --all --prune && git branch -vv | grep '\\(origin\\|fork\\|src\\)/.*: gone]' | awk '{print $1}' | xargs git branch -D";
+        prune-br =
+          "! git fetch --all --prune && git branch -vv | grep '\\(origin\\|fork\\|src\\)/.*: gone]' | awk '{print $1}' | xargs git branch -D";
         git = "!git";
       };
     };
@@ -292,7 +294,7 @@ in {
           hunk-header-style = "file line-number syntax";
         };
         features = "decorations";
-        nagivate = "true"; #Use n and N to jump between sections
+        nagivate = "true"; # Use n and N to jump between sections
         interactive = {
           keep-plus-minus-markers = false;
           side-by-side = true;
@@ -305,23 +307,28 @@ in {
   programs.gh = {
     enable = true;
 
-    enableGitCredentialHelper = true;
     settings = {
       git_protocol = "ssh";
       prompt = "enabled";
-      aliases = {
-        co = "pr checkout";
-      };
+      aliases = { co = "pr checkout"; };
     };
+
+    # This is only for HTTPS, and I only use SSH anyways
+    enableGitCredentialHelper = false;   
   };
 
   services.gpg-agent = {
     enable = true;
-    enableSshSupport = true;
     enableFishIntegration = true;
     pinentryFlavor = "gnome3";
   };
 
+  # This spits out an SSH_AUTH_SOCK variable, 
+  # which you have to put in the shell init.
+  services.gnome-keyring = {
+    enable = true;
+    components = [ "ssh" "secrets" "pkcs11" ];
+  };
 
   ## Coding
 
@@ -335,25 +342,22 @@ in {
         indent_style = "space";
         indent_size = "2";
       };
-      "*.py" = {
-        indent_size = "4";
-      };
+      "*.py" = { indent_size = "4"; };
     };
   };
 
-  programs.vscode = 
-    let 
-      system = builtins.currentSystem;
-      extensions =
-        (import (builtins.fetchGit {
-          url = "https://github.com/nix-community/nix-vscode-extensions";
-          ref = "refs/heads/master";
-          rev = "c43d9089df96cf8aca157762ed0e2ddca9fcd71e";
-        })).extensions.${system};      
-    in {
+  programs.vscode = let
+    system = builtins.currentSystem;
+    extensions = (import (builtins.fetchGit {
+      url = "https://github.com/nix-community/nix-vscode-extensions";
+      ref = "refs/heads/master";
+      rev = "c43d9089df96cf8aca157762ed0e2ddca9fcd71e";
+    })).extensions.${system};
+  in {
     enable = true;
     enableUpdateCheck = false;
-    mutableExtensionsDir = false; # Don't let VSCode itself manage extensions, but instead force extensions to be installed via this file.
+    mutableExtensionsDir =
+      false; # Don't let VSCode itself manage extensions, but instead force extensions to be installed via this file.
     extensions = with extensions.vscode-marketplace; [
       github.github-vscode-theme
       eamodio.gitlens
@@ -387,7 +391,10 @@ in {
       "editor"."tabSize" = 2;
 
       # Theming / setup
-      "workbench"."colorTheme" = "Adwaita Light";
+      "workbench"."colorTheme" = "Adwaita Dark";
+      "window"."autoDetectColorScheme" = true;
+      "workbench"."preferredDarkColorTheme" = "Adwaita Dark";
+      "workbench"."preferredLightColorTheme" = "Adwaita Dark";
       "editor"."fontFamily" = "monospace";
       "editor"."fontLigatures" = true;
       "editor"."fontSize" = 23;
@@ -396,7 +403,8 @@ in {
       "workbench"."iconTheme" = "vscode-icons";
       "workbench"."productIconTheme" = "fluent-icons";
       "window"."nativeTabs" = true;
-      "window"."title" = "\${dirty}\${activeEditorLong}\${separator}\${appName}\${separator}\${remoteName}";
+      "window"."title" =
+        "\${dirty}\${activeEditorLong}\${separator}\${appName}\${separator}\${remoteName}";
       "window"."titleSeparator" = " — ";
       "window"."menuBarVisibility" = "compact";
       "window"."titleBarStyle" = "custom";
@@ -428,7 +436,7 @@ in {
       "editor"."selectionClipboard" = false;
       "editor"."defaultFormatter" = "esbenp.prettier-vscode";
       "rust-analyzer"."checkOnSave"."command" = "clippy";
-      "colorize"."include" = ["*"];
+      "colorize"."include" = [ "*" ];
       "css"."lint"."zeroUnits" = "warning";
       "css"."lint"."ieHack" = "warning";
       "css"."lint"."unknownAtRules" = "ignore";
@@ -459,33 +467,17 @@ in {
       "[json]" = {
         "editor"."defaultFormatter" = "vscode.json-language-features";
       };
-      "[xml]" = {
-        "editor"."defaultFormatter" = "redhat.vscode-xml";
-      };
-      "[elixir]" = {
-        "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
-      };
+      "[xml]" = { "editor"."defaultFormatter" = "redhat.vscode-xml"; };
+      "[elixir]" = { "editor"."defaultFormatter" = "JakeBecker.elixir-ls"; };
       "[phoenix-heex]" = {
         "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
       };
-      "[eex]" = {
-        "editor"."defaultFormatter" = "JakeBecker.elixir-ls";
-      };
-      "[css]" = {
-        "editor"."defaultFormatter" = "esbenp.prettier-vscode";
-      };
-      "[xsl]" = {
-        "editor"."defaultFormatter" = "redhat.vscode-xml";
-      };
-      "[python]" = {
-        "editor"."formatOnType" = true;
-      };
-      "[toml]" = {
-        "editor"."defaultFormatter" = "tamasfe.even-better-toml";
-      };
-      "emmet"."includeLanguages" = {
-        "phoenix-heex" = "html";
-      };
+      "[eex]" = { "editor"."defaultFormatter" = "JakeBecker.elixir-ls"; };
+      "[css]" = { "editor"."defaultFormatter" = "esbenp.prettier-vscode"; };
+      "[xsl]" = { "editor"."defaultFormatter" = "redhat.vscode-xml"; };
+      "[python]" = { "editor"."formatOnType" = true; };
+      "[toml]" = { "editor"."defaultFormatter" = "tamasfe.even-better-toml"; };
+      "emmet"."includeLanguages" = { "phoenix-heex" = "html"; };
       "tailwindCSS"."includeLanguages" = {
         "elixir" = "html";
         "phoenix-heex" = "html";
@@ -508,18 +500,23 @@ in {
     };
   };
 
+  programs.script-directory = {
+    enable = true;
+    settings = {
+      SD_ROOT = script-directory;
+    };
+  };
 
   ## Passwords
 
   programs.password-store = {
     enable = true;
     package = pkgs.pass-wayland;
-    
+
     settings = {
       PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.passwords";
     };
   };
-
 
   ## SSH
 
@@ -550,11 +547,11 @@ in {
     };
   };
 
-
   ## Terminal
 
   programs.kitty = {
     enable = true;
+    shellIntegration.enableFishIntegration = true;
 
     font = {
       name = "monospace";
@@ -588,11 +585,10 @@ in {
       color14 = "#${color-scheme.color14}";
       color15 = "#${color-scheme.color15}";
     };
-    #shellIntegration.enableFishIntegration = true;
   };
 
   programs.bat = {
-    enable = true; 
+    enable = true;
 
     config = {
       theme = "base16";
@@ -613,21 +609,17 @@ in {
   programs.starship = {
     enable = true;
     package = pkgs.starship;
-
     enableFishIntegration = true;
+
     settings = {
       add_newline = false;
-      line_break = {
-      	disabled = true;
-      };
+      line_break = { disabled = true; };
       character = {
         success_symbol = "[>](bold green)";
         error_symbol = "[x](bold red)";
         vimcmd_symbol = "[<](bold green)";
       };
-      git_commit = {
-        tag_symbol = " tag ";
-      };
+      git_commit = { tag_symbol = " tag "; };
       git_status = {
         ahead = ">";
         behind = "<";
@@ -635,15 +627,9 @@ in {
         renamed = "r";
         deleted = "x";
       };
-      directory = {
-        read_only = " ro";
-      };
-      git_branch = {
-        symbol = "git ";
-      };
-      memory_usage = {
-        symbol = "mem ";
-      };
+      directory = { read_only = " ro"; };
+      git_branch = { symbol = "git "; };
+      memory_usage = { symbol = "mem "; };
       format = lib.concatStrings [
         "$username"
         "$hostname"
@@ -652,7 +638,7 @@ in {
         "$vcsh"
         "$git_branch"
         "$git_commit"
-        "$git_state"
+        "$git_status"
         "$git_metrics"
         "$cmake"
         "$meson"
@@ -666,14 +652,13 @@ in {
     };
   };
 
-
   ## Misc
 
   programs.chromium = {
     enable = true;
     package = pkgs.ungoogled-chromium;
 
-    extensions = []; # TODO: add later!
+    extensions = [ ]; # TODO: add later!
   };
 
   gtk = {
@@ -707,14 +692,115 @@ in {
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
 
-    ".dialogrc".text = 
-      dialog-color-scheme;
+    ".dialogrc".text = dialog-color-scheme;
 
     ".githooks/pre-push".text = ''
       #!/bin/sh
       bix pre-push
     '';
-  }; 
+
+    ".config/fish/completions/sd.fish".text = ''
+     # Completions for the custom Script Directory (sd) script
+
+     # These are based on the contents of the Script Directory, so we're reading info from the files.
+     # The description is taken either from the first line of the file $cmd.help,
+     # or the first non-shebang comment in the $cmd file.
+
+     # Disable file completions
+     complete -c sd -f
+
+     # Create command completions for a subcommand
+     # Takes a list of all the subcommands seen so far
+     function __list_subcommand
+         # Handles fully nested subcommands
+         set basepath (string join '/' ${script-directory} $argv)
+          # Total subcommands
+         # Used so that we can ignore duplicate commands
+         set -l commands
+         for file in (ls -d $basepath/*)
+             set cmd (basename $file .help)
+             set helpfile $cmd.help
+             if [ (basename $file) != "$helpfile" ]
+                 set commands $commands $cmd
+             end
+         end
+          # Setup the check for when to show these commands
+         # Basically you need to have seen everything in the path up to this point but not any commands in the current irectory.
+         # This will cause problems if you have a command with the same name as a directory parent.
+         set check
+         for arg in $argv
+             set check (string join ' and ' $check "__fish_seen_subcommand_from $arg;")
+         end
+         set check (string join ' ' $check "and not __fish_seen_subcommand_from $commands")
+          # Loop through the files using their full path names.
+         for file in (ls -d $basepath/*)
+             set cmd (basename $file .help)
+             set helpfile $cmd.help
+             if [ (basename $file) = "$helpfile" ]
+                 # This is the helpfile, use it for the help statement
+                 set help (head -n1 "$file")
+                 complete -c sd -a "$cmd" -d "$help" \
+                     -n $check
+             else if test -d "$file"
+                 set help "$cmd commands"
+                 __list_subcommand $argv $cmd
+                 complete -c sd -a "$cmd" -d "$help" \
+                     -n "$check"
+             else
+                 set help (sed -nE -e '/^#!/d' -e '/^#/{s/^# *//; p; q;}' "$file")
+                 if not test -e "$helpfile"
+                     complete -c sd -a "$cmd" -d "$help" \
+                         -n "$check"
+                 end
+             end
+         end
+     end
+
+     function __list_commands
+         # commands is used in the completions to know if we've seen the base commands
+         set -l commands
+         # Create a list of commands for this directory.
+         # The list is used to know when to not show more commands from this directory.
+         for file in $argv
+             set cmd (basename $file .help)
+             set helpfile $cmd.help
+             if [ (basename $file) != "$helpfile" ]
+                 # Ignore the special commands that take the paths as input.
+                 if not contains $cmd cat edit help new which
+                     set commands $commands $cmd
+                 end
+             end
+         end
+         for file in $argv
+             set cmd (basename $file .help)
+             set helpfile $cmd.help
+             if [ (basename $file) = "$helpfile" ]
+                 # This is the helpfile, use it for the help statement
+                 set help (head -n1 "$file")
+                 complete -c sd -a "$cmd" -d "$help" \
+                     -n "not __fish_seen_subcommand_from $commands"
+             else if test -d "$file"
+                 # Directory, start recursing into subcommands
+                 set help "$cmd commands"
+                 __list_subcommand $cmd
+                complete -c sd -a "$cmd" -d "$help" \
+                     -n "not __fish_seen_subcommand_from $commands"
+             else
+                  # Script
+                # Pull the help text from the first non-shebang commented line.
+                 set help (sed -nE -e '/^#!/d' -e '/^#/{s/^# *//; p; q;}' "$file")
+                  if not test -e "$helpfile"
+                     complete -c sd -a "$cmd" -d "$help" \
+                         -n "not __fish_seen_subcommand_from $commands"
+                 end
+             end
+         end
+     end
+
+      # Hardcode the starting directory
+     __list_commands ${script-directory}/*
+    '';
+  };
 
   programs.home-manager.enable = true;
 

@@ -4,17 +4,14 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   ## Bootloader
 
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
-  boot.loader.grub.useOSProber = false;
-
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   ## Networking
 
@@ -23,20 +20,20 @@
   networking.enableIPv6 = false;
   #networking.defaultGateway = "192.168.1.1";
   #networking.nameservers = [ "8.8.8.8" ];
-  
+
   # Hosts file
   # (Optionally remove '-porn' from the url ;) ...)
   networking.extraHosts = let
-    hostsPath = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts";
+    hostsPath =
+      "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts";
     hostsFile = builtins.fetchurl hostsPath;
   in builtins.readFile "${hostsFile}";
-  
 
   ## Locale
 
   time.timeZone = "Europe/Amsterdam";
 
-  i18n.defaultLocale = "en_US.UTF-8";  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8"; # Select internationalisation properties.
 
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "nl_NL.UTF-8";
@@ -50,7 +47,6 @@
     LC_TIME = "nl_NL.UTF-8";
   };
 
-
   ## Keymap
 
   services.xserver = {
@@ -60,27 +56,28 @@
 
   console.keyMap = "us-acentos";
 
-
   ## Users
 
-  users.mutableUsers = false; # Disable imperatively adding/modifying users using useradd, usermod etc.
+  users.mutableUsers =
+    false; # Disable imperatively adding/modifying users using useradd, usermod etc.
 
-  users.users.root.initialHashedPassword = "$y$j9T$bLPCHboiH0gwS3OFClO8c/$I64k3abGdocz4a8rGlB.YSSHquzMXHkfSPZSSAR7aY5";
+  users.users.root.initialHashedPassword =
+    "$y$j9T$bLPCHboiH0gwS3OFClO8c/$I64k3abGdocz4a8rGlB.YSSHquzMXHkfSPZSSAR7aY5";
 
   users.users.robin = {
     isNormalUser = true;
     description = "Robin Boers";
-    hashedPassword = "$y$j9T$oXO6uosfLDvrfO6O.apcw1$kSheV9P3BqVlDZJdFfMQdBVeubp3KC/kLbVoLKdoMPB";
+    hashedPassword =
+      "$y$j9T$oXO6uosfLDvrfO6O.apcw1$kSheV9P3BqVlDZJdFfMQdBVeubp3KC/kLbVoLKdoMPB";
     extraGroups = [ "wheel" "networkmanager" "video" ];
-    packages = with pkgs; [];
+    packages = with pkgs; [ ];
   };
 
   programs.fish.enable = true; # Use fish as default shell
   users.defaultUserShell = pkgs.fish;
 
-
   # Packages
-  
+
   nixpkgs.config.allowUnfree = true; # Allow unfree packages
 
   environment.systemPackages = with pkgs; [
@@ -98,7 +95,7 @@
     # CLI tools    
     fd
     ripgrep
-    jq    
+    jq
 
     # Theming
     adw-gtk3
@@ -108,12 +105,16 @@
     home-manager
 
     # Needed to make VM work
-    libva
+    #libva
   ];
+
+  nix.settings = {
+    keep-outputs = true;
+    keep-derivations = true;
+  };
 
   system.autoUpgrade.enable = true; # Autoupdating
   system.autoUpgrade.allowReboot = true;
-
 
   ## Security
 
@@ -130,17 +131,15 @@
   }];
 
   security.rtkit.enable = true; # Needed for sound to work.
-  security.polkit.enable = true; # Use polkit for access to shutdown, reboot etc.
-
+  security.polkit.enable =
+    true; # Use polkit for access to shutdown, reboot etc.
 
   ## Hardware
 
-  
   hardware.bluetooth.enable = false; # Disable bluetooth
 
   # Sound
   sound.enable = true;
-  sound.mediaKeys.enable = true; # TTY-compatible keyboard shortcuts
 
   # Use pipewire instead of pulse
   hardware.pulseaudio.enable = false;
@@ -180,9 +179,8 @@
     enable = true;
 
     # Needed to make Sway work in VMs
-    package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
+    #package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
   };
-
 
   ## Graphical session (Sway + GNOME services)
 
@@ -190,14 +188,14 @@
     enable = true;
     wrapperFeatures = {
       gtk = true;
-      base  = true;
+      base = true;
     };
     extraPackages = with pkgs; [
       xdg-utils # for opening programs using custom handlers (steam:// etc.)
       glib # gsettings support
       gnome.gnome-session
       gnome.gnome-control-center
-      qt5.qtwayland 
+      qt5.qtwayland
       polkit_gnome
     ];
     extraSessionCommands = ''
@@ -209,17 +207,18 @@
       export MOX_ENABLE_WAYLAND=1
     '';
   };
-  
+
   # Desktop integration
   services.dbus.enable = true;
   services.xserver.updateDbusEnvironment = true; # Make dbus work in Xwayland?
   services.udisks2.enable = true;
   services.avahi.enable = true;
+  services.gvfs.enable = true;
   xdg.mime.enable = true;
   xdg.icons.enable = true;
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;
-  xdg.portal.extraPortals = 
+  xdg.portal.extraPortals =
     [ pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
 
   # Settings
@@ -228,49 +227,22 @@
 
   # Keyring & polkit
   programs.seahorse.enable = true;
-  services.gnome.gnome-keyring.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
   security.pam.services.passwd.enableGnomeKeyring = true;
-  services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
-
-  systemd.user.services.gnome-keyring = {
-    description = "GNOME Keyring: service that stores your passwords and secrets";
-    documentation = [ "man:gnome-keyring(1)" "man:gnome-keyring-daemon(1)" ];
-    partOf = [ "graphical-session.target" ];
-
-    path = with pkgs; [
-      gnome.gnome-keyring
-      systemd
-    ];
-
-    script = "gnome-keyring-daemon";
-    scriptArgs = "--components=ssh,secrets,pkcs11 --start --foreground --control-directory=%t/keyring";
-    postStart = "systemctl --user set-environment SSH_AUTH_SOCK=%t/keyring/ssh";
-    postStop = "systemctl --user unset-environment SSH_AUTH_SOCK";
-
-    wantedBy = [ "gnome-services.target" ];
-   
-    serviceConfig = {
-      Type = "dbus";
-      BusName = [ "org.gnome.keyring" "org.freedesktop.secrets" ];
-    };
-  };
+  services.gnome.at-spi2-core.enable =
+    true; # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
 
   systemd.user.services.gnome-polkit = {
     description = "Legacy polkit authentication agent for GNOME";
     partOf = [ "graphical-session.target" ];
 
-    path = with pkgs; [
-      polkit_gnome
-    ];
+    path = with pkgs; [ polkit_gnome ];
 
     script = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
 
     wantedBy = [ "gnome-services.target" ];
 
-    serviceConfig = {
-      Type = "simple";
-    };
+    serviceConfig = { Type = "simple"; };
   };
 
   systemd.user.targets.gnome-services = {
@@ -304,7 +276,7 @@
       "gsd-wacom.target"
       "gsd-wwan.target"
     ];
-  };  
+  };
 
   ## Fonts
 
@@ -324,11 +296,13 @@
       font-awesome
       noto-fonts
     ];
-    
+
     fontconfig = {
       defaultFonts = {
-        serif = [ "Libertinus" ];
+        serif = [ "Libertinus Serif" ];
         sansSerif = [ "Inter" ];
+        emoji =
+          [ "Apple Color Emoji" ]; # That's the name of the Whatsapp font :p
         monospace = [ "Jetbrains Mono" "Fira Code" "IMB Plex Mono" ];
       };
     };
@@ -339,14 +313,12 @@
     earlySetup = true;
     font = "${pkgs.terminus_font}/share/consolefonts/ter-118n.psf.gz";
     packages = with pkgs; [ terminus_font ];
-  };  
-
-
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  
+
   # programs.gnupg.agent = {
   #   enable = true;
   #   enableSSHSupport = true;

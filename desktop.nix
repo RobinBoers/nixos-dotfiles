@@ -1,9 +1,9 @@
 { config, pkgs, lib, ... }:
 
-let 
+let
   ## Custom binaries
 
-  wayland-dbus-environment = 
+  wayland-dbus-environment =
     pkgs.writeShellScriptBin "wayland-dbus-environment" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SWAYSOCK \
         I3SOCK \
@@ -21,22 +21,19 @@ let
       ${pkgs.systemd}/bin/systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
     '';
 
-  wayland-gsettings = 
-    let
-      schema = pkgs.gsettings-desktop-schemas;
-      datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-    in
-    pkgs.writeShellScriptBin "wayland-gsettings" ''
-      export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
-    '';
+  wayland-gsettings = let
+    schema = pkgs.gsettings-desktop-schemas;
+    datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+  in pkgs.writeShellScriptBin "wayland-gsettings" ''
+    export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
+  '';
 
-  wayland-screenshot = 
-    pkgs.writeShellScriptBin "wayland-screenshot" ''
-      ${pkgs.slurp}/bin/slurp \
-      | ${pkgs.grim}/bin/grim -g - - \
-      | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.wl-clipboard}/bin/wl-paste \
-      > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
-    '';
+  wayland-screenshot = pkgs.writeShellScriptBin "wayland-screenshot" ''
+    ${pkgs.slurp}/bin/slurp \
+    | ${pkgs.grim}/bin/grim -g - - \
+    | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.wl-clipboard}/bin/wl-paste \
+    > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
+  '';
 
   # Since gnome-control-center and GNOME wallpapers in general
   # don't work yet, I hard-code the wallpaper path here for now.
@@ -49,46 +46,42 @@ let
   #   | ${pkgs.util-linux}/bin/rev
   # '';
 
-  wayland-get-wallpaper = 
-    pkgs.writeShellScriptBin "wayland-get-wallpaper" ''
-      echo /home/robin/pictures/wallpaper.jpg
-    '';
+  wayland-get-wallpaper = pkgs.writeShellScriptBin "wayland-get-wallpaper" ''
+    echo /home/robin/pictures/wallpaper.jpg
+  '';
 
   # TODO(robin): refactor this.
   # This is currently duplicated from `wayland-gsettings`.
 
-  gtk3-darkmode-daemon = 
-    let
-      schema = pkgs.gsettings-desktop-schemas;
-      datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-    in
-    pkgs.writeShellScriptBin "gtk3-darkmode-daemon" ''
-      #!/bin/sh
+  gtk3-darkmode-daemon = let
+    schema = pkgs.gsettings-desktop-schemas;
+    datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+  in pkgs.writeShellScriptBin "gtk3-darkmode-daemon" ''
+    #!/bin/sh
 
-      export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
+    export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
 
-      sync_darkmode() {
-        GNOME_SCHEMA="org.gnome.desktop.interface"
-        SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
-        THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
+    sync_darkmode() {
+      GNOME_SCHEMA="org.gnome.desktop.interface"
+      SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
+      THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
 
-        if [ "$SCHEME" == "'default'" ]; then
-          ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
-        else
-          ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
-        fi
-      }
+      if [ "$SCHEME" == "'default'" ]; then
+        ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
+      else
+        ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
+      fi
+    }
 
-      # Initial sync
-      sync_darkmode
+    # Initial sync
+    sync_darkmode
 
-      # Monitor gsettings to resync when the color scheme changes
-      ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
-      while read -r line; do
-          sync_darkmode
-      done
-    '';
-
+    # Monitor gsettings to resync when the color scheme changes
+    ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
+    while read -r line; do
+        sync_darkmode
+    done
+  '';
 
   ## Global
 
@@ -101,32 +94,32 @@ in {
   ## Packages
 
   home.packages = with pkgs; [
-      wayland-dbus-environment
-      wayland-gsettings
-      wayland-screenshot
-      wayland-get-wallpaper
-      
-      # Utilities
-      grim
-      slurp
-      clipman
-      playerctl
-      wl-clipboard
-      
-      # Sway services
-      swaybg
-      gtk3-darkmode-daemon
-      autotiling
-      swayest-workstyle
-      wob
+    wayland-dbus-environment
+    wayland-gsettings
+    wayland-screenshot
+    wayland-get-wallpaper
 
-      # Misc
-      gsettings-desktop-schemas # Used in `wayland-gsettings`.
-      sound-theme-freedesktop # Used in mako config.
+    # Utilities
+    grim
+    slurp
+    clipman
+    playerctl
+    wl-clipboard
+    pulseaudio
+
+    # Sway services
+    swaybg
+    gtk3-darkmode-daemon
+    autotiling
+    swayest-workstyle
+    wob
+
+    # Misc
+    gsettings-desktop-schemas # Used in `wayland-gsettings`.
+    sound-theme-freedesktop # Used in mako config.
   ];
 
-  programs.foot.enable = false;  # Don't install foot!!
-
+  programs.foot.enable = false; # Don't install foot!!
 
   ## Launcher
 
@@ -138,17 +131,16 @@ in {
     terminal = terminal;
     extraConfig = {
       modes = [ "combi" ];
-      combi-modes =  [ "drun" "run" ];
+      combi-modes = [ "drun" "run" ];
       show-icons = false;
       display-drun = "";
       drun-display-format = "{name}";
       disable-history = false;
       fullscreen = false;
     };
-    theme = let inherit (config.lib.formats.rasi) mkLiteral; in {
-      "*" = {
-        background-color = mkLiteral "#285577";
-      };
+    theme = let inherit (config.lib.formats.rasi) mkLiteral;
+    in {
+      "*" = { background-color = mkLiteral "#285577"; };
       "window" = {
         anchor = mkLiteral "center";
         location = mkLiteral "north";
@@ -159,11 +151,9 @@ in {
       };
       "mainbox" = {
         border = 0;
-	      padding = 0;
+        padding = 0;
       };
-      "textbox" = {
-        text-color = mkLiteral "#FFFFFF";
-      };
+      "textbox" = { text-color = mkLiteral "#FFFFFF"; };
       "listview" = {
         fixed-height = 0;
         spacing = mkLiteral "2px";
@@ -171,55 +161,51 @@ in {
       };
       "element" = {
         border = 0;
-	      padding = mkLiteral "1px";
+        padding = mkLiteral "1px";
       };
       "element-text" = {
         background-color = mkLiteral "inherit";
-	      text-color = mkLiteral "inherit";
+        text-color = mkLiteral "inherit";
       };
       "element.normal" = {
         background-color = mkLiteral "#285577";
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
       "element.selected" = {
         background-color = mkLiteral "#4C7899";
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
       "scrollbar" = {
         width = mkLiteral "4px";
-	      border = 0;
-	      handle-width = mkLiteral "8px";
-	      padding = 0;
+        border = 0;
+        handle-width = mkLiteral "8px";
+        padding = 0;
       };
       "button.selected" = {
         background-color = mkLiteral "#4C7899";
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
       "inputbar" = {
         spacing = 0;
         text-color = mkLiteral "#FFFFFF";
         background-color = mkLiteral "#285577";
         padding = mkLiteral "1px";
-        children = [ 
-          (mkLiteral "entry")
-          (mkLiteral "case-indicator")
-        ];
+        children = [ (mkLiteral "entry") (mkLiteral "case-indicator") ];
       };
       "case-indicator" = {
         spacing = 0;
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
       "entry" = {
         spacing = 0;
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
       "prompt" = {
         scaling = 0;
-	      text-color = mkLiteral "#FFFFFF";
+        text-color = mkLiteral "#FFFFFF";
       };
     };
   };
-
 
   ## Services
 
@@ -230,23 +216,19 @@ in {
     systemdTarget = sway-systemd-target;
     profiles = {
       vm = {
-        outputs = [
-          {
-            criteria = "Virtual-1";
-            mode = "1920x1080";
-            position = "0,0";
-          }
-        ];
+        outputs = [{
+          criteria = "Virtual-1";
+          mode = "1920x1080";
+          position = "0,0";
+        }];
       };
       undocked = {
-        outputs = [
-          {
-            criteria = "eDP-1";
-            mode = "1920x1080";
-            position = "0,0";
-            status = "enable";
-          }          
-        ];
+        outputs = [{
+          criteria = "eDP-1";
+          mode = "1920x1080";
+          position = "0,0";
+          status = "enable";
+        }];
       };
       home-two-displays = {
         outputs = [
@@ -298,19 +280,17 @@ in {
       };
     };
   };
-  
+
   # Idle management with swaylock integration
   # (binds to systemd)
   services.swayidle = {
     enable = true;
     systemdTarget = sway-systemd-target;
     extraArgs = [ "-w" ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "swaylock --image $(wayland-get-wallpaper)";
-      }
-    ];
+    events = [{
+      event = "before-sleep";
+      command = "swaylock --image $(wayland-get-wallpaper)";
+    }];
   };
 
   # Notification daemon
@@ -340,23 +320,20 @@ in {
       ExecStart = "${pkgs.mako}/bin/mako";
       ExecReload = "${pkgs.mako}/bin/makoctl reload";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.autotiling = {
     Unit = {
-      Description = "Script for sway and i3 to automatically switch the horizontal / vertical window split orientation ";
+      Description =
+        "Script for sway and i3 to automatically switch the horizontal / vertical window split orientation ";
       PartOf = "graphical-session.target";
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.autotiling}/bin/autotiling";
+      ExecStart = "${pkgs.autotiling}/bin/autotiling";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.sworkstyle = {
@@ -367,11 +344,9 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.swayest-workstyle}/bin/sworkstyle";
+      ExecStart = "${pkgs.swayest-workstyle}/bin/sworkstyle";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.swaybg = {
@@ -379,30 +354,29 @@ in {
       Description = "Wallpaper setter for sway";
       Documentation = [ "man:swaybg(1)" ];
       PartOf = "graphical-session.target";
+      After = sway-systemd-target;
     };
     Service = {
       Type = "oneshot";
-      ExecStart = "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
+      ExecStart =
+        "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.gtk3-darkmode-daemon = {
     Unit = {
-      Description = "Simple daemon set the GTK theme based on the dark mode preference in GNOME";
+      Description =
+        "Simple daemon set the GTK theme based on the dark mode preference in GNOME";
       PartOf = "graphical-session.target";
     };
     Service = {
       Type = "simple";
-      ExecStart= "${gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
+      ExecStart = "${gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
-  
+
   systemd.user.services.playerctld = {
     Unit = {
       Description = "Control media players via MPRIS";
@@ -411,18 +385,15 @@ in {
     };
     Service = {
       Type = "simple";
-      ExecStart= "${pkgs.playerctl}/bin/playerctld";
+      ExecStart = "${pkgs.playerctl}/bin/playerctld";
     };
-    Install = {
-      WantedBy = [ sway-systemd-target ];
-    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
-
 
   ## Window manager
 
-  wayland.windowManager.sway = 
-    let mod = "Mod4"; in {
+  wayland.windowManager.sway = let mod = "Mod4";
+  in {
     enable = true;
     package = null; # Managed in configuration.nix
 
@@ -445,37 +416,36 @@ in {
       focus = {
         followMouse = true;
         wrapping = "workspace";
-        newWindow = "urgent"; # Mark new windows as urgent (red in workspace bar), but don't let them steal focus.
+        newWindow =
+          "urgent"; # Mark new windows as urgent (red in workspace bar), but don't let them steal focus.
       };
-      bars = [
-        {
-          colors = {
-            # iceberg
-            background = "#${color-scheme.dark}";
-            
-            # windows
-            # background = "#d1e5ef";
-            # focusedWorkspace "#eef3f8 #eef3f8 #282A36";
-            # inactiveWorkspace = "#d1e5ef #d1e5ef #282A36";
-          };
-          
-          extraConfig = ''
-            height 40
-            workspace_min_width 40
-            font pango:FontAwesome 13
-          '';
+      bars = [{
+        colors = {
+          # iceberg
+          background = "#${color-scheme.dark}";
 
-          position = "bottom";
-          
-          # bumblebee-status hasn't been packaged for NixOS yet :(
-          # See https://github.com/tobi-wan-kenobi/bumblebee-status/issues/821
+          # windows
+          # background = "#d1e5ef";
+          # focusedWorkspace "#eef3f8 #eef3f8 #282A36";
+          # inactiveWorkspace = "#d1e5ef #d1e5ef #282A36";
+        };
 
-          # When it will be packaged, I'd need to add a little script or something,
-          # that copies my iceberg-contrast-padding theme to /usr/share/bumblebee-status/themes/
+        extraConfig = ''
+          height 40
+          workspace_min_width 40
+          font pango:FontAwesome 13
+        '';
 
-          # statusCommand = "/usr/bin/bumblebee-status --theme iceberg-contrast-padding";
-        }
-      ];
+        position = "bottom";
+
+        # bumblebee-status hasn't been packaged for NixOS yet :(
+        # See https://github.com/tobi-wan-kenobi/bumblebee-status/issues/821
+
+        # When it will be packaged, I'd need to add a little script or something,
+        # that copies my iceberg-contrast-padding theme to /usr/share/bumblebee-status/themes/
+
+        # statusCommand = "/usr/bin/bumblebee-status --theme iceberg-contrast-padding";
+      }];
       gaps = {
         # inner = 10;
         # outer = 5;
@@ -486,123 +456,144 @@ in {
         hideEdgeBorders = "smart";
         titlebar = false;
       };
-      keybindings =
-        lib.mkOptionDefault {
-          # Alt-Tab to switch between workspaces
-          "Mod1+Tab" = "workspace back_and_forth";
-          "${mod}+Tab" = "workspace back_and_forth";
+      keybindings = lib.mkOptionDefault {
+        # Alt-Tab to switch between workspaces
+        "Mod1+Tab" = "workspace back_and_forth";
+        "${mod}+Tab" = "workspace back_and_forth";
 
-          # Ctrl+Tab to cycle windows in tabbed mode
-          # "Control+Tab" = "focus next"; 
+        # Ctrl+Tab to cycle windows in tabbed mode
+        # "Control+Tab" = "focus next"; 
 
-          # Start terminal
-          "Mod1+Return" = "exec ${terminal}";
-          "${mod}+Return" = "exec ${terminal}";
+        # Start terminal
+        "Mod1+Return" = "exec ${terminal}";
+        "${mod}+Return" = "exec ${terminal}";
 
-          # Super+q to close window
-          "${mod}+q" = "kill";
+        # Super+q to close window
+        "${mod}+q" = "kill";
 
-          # Run prompt
-          "${mod}+r" = "exec rofi -show run";
+        # Run prompt
+        "${mod}+r" = "exec rofi -show run";
 
-          # Screenshotting
-          "${mod}+Shift+s" = "exec wayland-screenshot";
+        # Screenshotting
+        "${mod}+Shift+s" = "exec wayland-screenshot";
 
-          # Screen locking
-          "${mod}+l" = "exec swaylock --grace 0 --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
+        # Screen locking
+        "${mod}+l" =
+          "exec swaylock --grace 0 --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
 
-          # Reload & exit
-          "Control+Mod1+r" = "reload";
-          "Control+Mod1+q" = "exec swaymsg exit";
+        # Reload & exit
+        "Control+Mod1+r" = "reload";
+        "Control+Mod1+q" = "exec swaymsg exit";
 
-          # Workspace management
-          "${mod}+Left" = "focus left";
-          "${mod}+Down" = "focus down";
-          "${mod}+Up" = "focus up";
-          "${mod}+Right" = "focus right";
+        # Workspace management
+        "${mod}+Left" = "focus left";
+        "${mod}+Down" = "focus down";
+        "${mod}+Up" = "focus up";
+        "${mod}+Right" = "focus right";
 
-          "Mod1+Control+Right" = "workspace next";
-          "Mod1+Control+Left" = "workspace prev";
+        "Mod1+Control+Right" = "workspace next";
+        "Mod1+Control+Left" = "workspace prev";
 
-          "${mod}+Shift+Left" = "move left";
-          "${mod}+Shift+Down" = "move down";
-          "${mod}+Shift+Up" = "move up";
-          "${mod}+Shift+Right" = "move right";
+        "${mod}+Shift+Left" = "move left";
+        "${mod}+Shift+Down" = "move down";
+        "${mod}+Shift+Up" = "move up";
+        "${mod}+Shift+Right" = "move right";
 
-          "${mod}+Control+Left" = "resize grow width 10 px or 10 ppt";
-          "${mod}+Control+Down" = "resize shrink height 10 px or 10 ppt";
-          "${mod}+Control+Up" = "resize grow height 10 px or 10 ppt";
-          "${mod}+Control+Right" = "resize shrink width 10 px or 10 ppt";
+        "${mod}+Control+Left" = "resize grow width 10 px or 10 ppt";
+        "${mod}+Control+Down" = "resize shrink height 10 px or 10 ppt";
+        "${mod}+Control+Up" = "resize grow height 10 px or 10 ppt";
+        "${mod}+Control+Right" = "resize shrink width 10 px or 10 ppt";
 
-          "${mod}+1" = "workspace number 1";
-          "${mod}+2" = "workspace number 2";
-          "${mod}+3" = "workspace number 3";
-          "${mod}+4" = "workspace number 4";
-          "${mod}+5" = "workspace number 5";
-          "${mod}+6" = "workspace number 6";
-          "${mod}+7" = "workspace number 7";
-          "${mod}+8" = "workspace number 8";
-          "${mod}+9" = "workspace number 9";
-          "${mod}+0" = "workspace number 10";
+        "${mod}+1" = "workspace number 1";
+        "${mod}+2" = "workspace number 2";
+        "${mod}+3" = "workspace number 3";
+        "${mod}+4" = "workspace number 4";
+        "${mod}+5" = "workspace number 5";
+        "${mod}+6" = "workspace number 6";
+        "${mod}+7" = "workspace number 7";
+        "${mod}+8" = "workspace number 8";
+        "${mod}+9" = "workspace number 9";
+        "${mod}+0" = "workspace number 10";
 
-          "${mod}+Shift+1" = "move container to workspace number 1";
-          "${mod}+Shift+2" = "move container to workspace number 2";
-          "${mod}+Shift+3" = "move container to workspace number 3";
-          "${mod}+Shift+4" = "move container to workspace number 4";
-          "${mod}+Shift+5" = "move container to workspace number 5";
-          "${mod}+Shift+6" = "move container to workspace number 6";
-          "${mod}+Shift+7" = "move container to workspace number 7";
-          "${mod}+Shift+8" = "move container to workspace number 8";
-          "${mod}+Shift+9" = "move container to workspace number 9";
-          "${mod}+Shift+0" = "move container to workspace number 10";
+        "${mod}+Shift+1" = "move container to workspace number 1";
+        "${mod}+Shift+2" = "move container to workspace number 2";
+        "${mod}+Shift+3" = "move container to workspace number 3";
+        "${mod}+Shift+4" = "move container to workspace number 4";
+        "${mod}+Shift+5" = "move container to workspace number 5";
+        "${mod}+Shift+6" = "move container to workspace number 6";
+        "${mod}+Shift+7" = "move container to workspace number 7";
+        "${mod}+Shift+8" = "move container to workspace number 8";
+        "${mod}+Shift+9" = "move container to workspace number 9";
+        "${mod}+Shift+0" = "move container to workspace number 10";
 
-          # Window state management
-          "${mod}+t" = "layout toggle tabbed splitv"; # Toggle tabbed mode        
-          "${mod}+f" = "floating toggle"; # Toggle floating
-          "${mod}+j" = "minimize toggle"; # Minimize applications        
-          "F11" = "fullscreen toggle"; # Toggle fullscreen
+        # Window state management
+        "${mod}+t" = "layout toggle tabbed splitv"; # Toggle tabbed mode
+        "${mod}+f" = "floating toggle"; # Toggle floating
+        "${mod}+j" = "minimize toggle"; # Minimize applications
+        "F11" = "fullscreen toggle"; # Toggle fullscreen
 
-          # Scratchpad
-          "${mod}+Shift+BackSpace" = "move scratchpad";
-          "${mod}+BackSpace" = "scratchpad show";
+        # Scratchpad
+        "${mod}+Shift+BackSpace" = "move scratchpad";
+        "${mod}+BackSpace" = "scratchpad show";
       };
-      startup = 
-        let gnome-schema = "org.gnome.desktop.interface"; 
-        in [
+      startup = let gnome-schema = "org.gnome.desktop.interface";
+      in [
         # Setup wayland session
         { command = "wayland-dbus-environment"; }
-        { command = "wayland-gsettings"; }
+        {
+          command = "wayland-gsettings";
+        }
 
         # Font settings
         { command = "gsettings set ${gnome-schema} font-name 'Inter'"; }
-        { command = "gsettings set ${gnome-schema} document-font-name 'Inter'"; }
-        { command = "gsettings set ${gnome-schema} font-antialiasing 'grayscale'"; }
-        { command = "gsettings set ${gnome-schema} font-hinting 'slight'"; }
+        {
+          command = "gsettings set ${gnome-schema} document-font-name 'Inter'";
+        }
+        {
+          command =
+            "gsettings set ${gnome-schema} font-antialiasing 'grayscale'";
+        }
+        {
+          command = "gsettings set ${gnome-schema} font-hinting 'slight'";
+        }
 
         # Disable audible bell
-        { 
-          command = "gsettings set org.gnome.desktop.wm.preferences audible-bell false"; 
+        {
+          command =
+            "gsettings set org.gnome.desktop.wm.preferences audible-bell false";
           # (Determines whether applications or the system can generate audible “beeps”; may be used in conjunction with “visual bell” to allow silent “beeps”.)
         }
-        
+
         # Prepare overlay image for swaylock
         # (See swaylock config for more info)
-        { 
-          command = "convert -size 1920x60 xc:transparent -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+0 'Type password to unlock' /tmp/locktext.png"; 
+        {
+          command =
+            "convert -size 1920x60 xc:transparent -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+0 'Type password to unlock' /tmp/locktext.png";
         }
 
         # Clipboard
-        { command = "wl-paste -t text --watch clipman store"; }
+        {
+          command = "wl-paste -t text --watch clipman store";
+        }
 
         # Wallpaper
         # ('always = true' is here to make wallpaper refresh
         # when sway is reloaded)
-        { command = "systemctl --user start swaybg"; always = true; }
+        {
+          command = "systemctl --user start swaybg";
+          always = true;
+        }
 
         # Set GTK theming
         # TODO(robin): replace this with a time-based daemon later.
-        { command = "gsettings set org.gnome.desktop.interface.gtk-theme '${gtk3-theme}'"; }
-        { command = "gsettings set org.gnome.desktop.interface.color-scheme 'default'"; }
+        {
+          command =
+            "gsettings set org.gnome.desktop.interface.gtk-theme '${gtk3-theme}'";
+        }
+        {
+          command =
+            "gsettings set org.gnome.desktop.interface.color-scheme 'default'";
+        }
 
         # Cool windows logo for first workspace
         # { command = "swaymsg rename workspace number 0 to "; }
@@ -614,31 +605,35 @@ in {
 
     # Options that couldn't be configured using Home Manager.
     extraConfigEarly = ''
-        # Start Rofi when pressing the Super key, because that is how it 
-        # works on Windows and that is how my workflow works :)
-        bindcode --release 133 exec rofi -show drun
+      # Start Rofi when pressing the Super key, because that is how it 
+      # works on Windows and that is how my workflow works :)
+      bindcode --release 133 exec rofi -show drun
 
-        # Autostart Spotify & configure scatchpad
-        exec --no-startup-id spotify
-        for_window [class="Spotify"] move scratchpad, resize set 1880 1010;
-        bindsym ${mod}+equal [class="Spotify"] scratchpad show
+      # Autostart Spotify & configure scatchpad
+      exec --no-startup-id spotify
+      for_window [title="Spotify"] move scratchpad, resize set 1880 1010;
+      bindsym ${mod}+equal [title="Spotify"] scratchpad show
 
-        # Setup wob
-        set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
-        exec rm -f $WOBSOCK && mkfifo $WOBSOCK && tail -f $WOBSOCK | wob
+      # Setup wob
+      set $WOBSOCK $XDG_RUNTIME_DIR/wob.sock
+      exec rm -f $WOBSOCK && mkfifo $WOBSOCK && tail -f $WOBSOCK | wob
 
-        # Media control (--locked is not available in Home Manager)
-        bindsym --locked ${mod}+p                exec playerctl play-pause
-        bindsym --locked ${mod}+less             exec playerctl previous
-        bindsym --locked ${mod}+greater          exec playerctl next
+      bindsym --locked XF86AudioRaiseVolume    exec pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
+      bindsym --locked XF86AudioLowerVolume    exec pactl set-sink-volume @DEFAULT_SINK@ -5% && pactl get-sink-volume @DEFAULT_SINK@ | head -n 1| awk '{print substr($5, 1, length($5)-1)}' > $WOBSOCK
+      bindsym --locked XF86AudioMute           exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+      bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOURCE@ toggle 
 
-        bindsym --locked XF86AudioPlay           exec playerctl play-pause
-        bindsym --locked XF86AudioPause          exec playerctl pause
-        bindsym --locked XF86AudioNext           exec playerctl next
-        bindsym --locked XF86AudioPrev           exec playerctl previous
+      # Media control (--locked is not available in Home Manager)
+      bindsym --locked ${mod}+p                exec playerctl play-pause
+      bindsym --locked ${mod}+less             exec playerctl previous
+      bindsym --locked ${mod}+greater          exec playerctl next
+
+      bindsym --locked XF86AudioPlay           exec playerctl play-pause
+      bindsym --locked XF86AudioPause          exec playerctl pause
+      bindsym --locked XF86AudioNext           exec playerctl next
+      bindsym --locked XF86AudioPrev           exec playerctl previous
     '';
   };
-
 
   ## Lock screen
 
