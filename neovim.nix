@@ -29,8 +29,8 @@
       " Hide stupid window seperators
       set fillchars-=vert:\|
       hi VertSplit ctermfg=0 ctermbg=NONE guifg=0 guibg=NONE
-      hi StatusLine ctermfg=0 ctermbg=NONE guifg=0 guibg=NONE
-      hi StatusLineNC ctermfg=0 ctermbg=NONE guifg=0 guibg=NONE
+      "hi StatusLine ctermfg=0 ctermbg=NONE guifg=0 guibg=NONE
+      "hi StatusLineNC ctermfg=0 ctermbg=NONE guifg=0 guibg=NONE
       hi TabLineFill ctermfg=black ctermbg=NONE
 
       hi TabLine ctermfg=darkgray ctermbg=black
@@ -159,20 +159,20 @@
 
       function! StatuslineGit()
         let l:branchname = fugitive#Head()
-        return strlen(l:branchname) > 0?' git '.l:branchname.' ':'\'
+        return strlen(l:branchname) > 0?' git '.l:branchname.' ':''
       endfunction
 
       set statusline=
-      set statusline+=%#StatusLine#
+      set statusline+=%#LineNr#
       set statusline+=\ %#{StatuslineModeColor()}#
       set statusline+=\ \ %{StatuslineMode()}\ \ 
-      set statusline+=%#WinBar#
+      set statusline+=%#ModeMsg#
       set statusline+=\ %{StatuslineGit()}    " Git branch
-      set statusline+=%#StatusLine#
+      set statusline+=%#LineNr#
       set statusline+=\ %f                    " Current file
       set statusline+=\ %#WarningMsg#
       set statusline+=\ %m                    " Dirty buffer state
-      set statusline+=%#StatusLine#
+      set statusline+=%#LineNr#
       set statusline+=%=                      " Left/right seperator
       set statusline+=\=\=\=
       set statusline+=\ %l:%c/%L             

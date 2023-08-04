@@ -479,7 +479,7 @@ in {
 
         # Screen locking
         "${mod}+l" =
-          "exec swaylock --grace 0 --image $(gsettings get org.gnome.desktop.background picture-uri | cut -c 9- | rev | cut -c 2- | rev)";
+          "exec swaylock --grace 0 --image $(wayland-get-wallpaper)";
 
         # Reload & exit
         "Control+Mod1+r" = "reload";
