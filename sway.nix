@@ -50,42 +50,8 @@ let
     echo /home/robin/pictures/wallpaper.jpg
   '';
 
-  # TODO(robin): refactor this.
-  # This is currently duplicated from `wayland-gsettings`.
-
-  gtk3-darkmode-daemon = let
-    schema = pkgs.gsettings-desktop-schemas;
-    datadir = "${schema}/share/gsettings-schemas/${schema.name}";
-  in pkgs.writeShellScriptBin "gtk3-darkmode-daemon" ''
-    #!/bin/sh
-
-    export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
-
-    sync_darkmode() {
-      GNOME_SCHEMA="org.gnome.desktop.interface"
-      SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
-      THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
-
-      if [ "$SCHEME" == "'default'" ]; then
-        ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
-      else
-        ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}-dark";
-      fi
-    }
-
-    # Initial sync
-    sync_darkmode
-
-    # Monitor gsettings to resync when the color scheme changes
-    ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface gtk-theme |
-    while read -r line; do
-        sync_darkmode
-    done
-  '';
-
   ## Global
 
-  gtk3-theme = "adw-gtk3";
   terminal = "${pkgs.kitty}/bin/kitty";
   color-scheme.dark = "14141d";
   sway-systemd-target = "sway-session.target";
@@ -109,7 +75,6 @@ in {
 
     # Sway services
     swaybg
-    gtk3-darkmode-daemon
     autotiling
     swayest-workstyle
     wob
@@ -363,19 +328,6 @@ in {
     Install = { Requires = [ sway-systemd-target ]; };
   };
 
-  systemd.user.services.gtk3-darkmode-daemon = {
-    Unit = {
-      Description =
-        "Simple daemon set the GTK theme based on the dark mode preference in GNOME";
-      PartOf = "graphical-session.target";
-    };
-    Service = {
-      Type = "simple";
-      ExecStart = "${gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon";
-    };
-    Install = { WantedBy = [ sway-systemd-target ]; };
-  };
-
   systemd.user.services.playerctld = {
     Unit = {
       Description = "Control media players via MPRIS";
@@ -535,25 +487,11 @@ in {
         "${mod}+Shift+BackSpace" = "move scratchpad";
         "${mod}+BackSpace" = "scratchpad show";
       };
-      startup = let gnome-schema = "org.gnome.desktop.interface";
-      in [
+      startup = [
         # Setup wayland session
         { command = "wayland-dbus-environment"; }
         {
           command = "wayland-gsettings";
-        }
-
-        # Font settings
-        { command = "gsettings set ${gnome-schema} font-name 'Inter'"; }
-        {
-          command = "gsettings set ${gnome-schema} document-font-name 'Inter'";
-        }
-        {
-          command =
-            "gsettings set ${gnome-schema} font-antialiasing 'grayscale'";
-        }
-        {
-          command = "gsettings set ${gnome-schema} font-hinting 'slight'";
         }
 
         # Disable audible bell
@@ -581,17 +519,6 @@ in {
         {
           command = "systemctl --user start swaybg";
           always = true;
-        }
-
-        # Set GTK theming
-        # TODO(robin): replace this with a time-based daemon later.
-        {
-          command =
-            "gsettings set org.gnome.desktop.interface gtk-theme '${gtk3-theme}'";
-        }
-        {
-          command =
-            "gsettings set org.gnome.desktop.interface color-scheme 'default'";
         }
 
         # Cool windows logo for first workspace

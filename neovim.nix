@@ -159,7 +159,7 @@
 
       function! StatuslineGit()
         let l:branchname = fugitive#Head()
-        return strlen(l:branchname) > 0?' git '.l:branchname.' ':''
+        return strlen(l:branchname) > 0?' git '.l:branchname.' ':' '
       endfunction
 
       set statusline=
