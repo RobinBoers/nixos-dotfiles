@@ -29,11 +29,12 @@ in {
         piousdeer.adwaita-theme
         dbaeumer.vscode-eslint
         rust-lang.rust-analyzer
-        miguelsolorio.fluent-icons
         tombonnike.vscode-status-bar-format-toggle
         jakebecker.elixir-ls
         brettm12345.nixfmt-vscode
         bbenoist.nix
+        joaopalmeiro.icons-octicons
+        miguelsolorio.fluent-icons
       ];
     })
   ];
