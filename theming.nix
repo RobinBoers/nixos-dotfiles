@@ -163,9 +163,6 @@ in {
   };
 
   programs.fish.shellInit = ''
-    # Simple daemon set the GTK theme based on the dark mode preference in GNOME
-    ${gtk3-darkmode-daemon}/bin/gtk3-darkmode-daemon 
-
     # home-manager can't handle this if I put it in
     # `home.sessionVariables` for some reason.
     export NEWT_COLORS="${newt-color-scheme}"
