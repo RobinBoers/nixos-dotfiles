@@ -204,7 +204,7 @@
       };
       "geheimesite.nl" = {
         hostname = "94.124.122.11";
-        user = "robin";
+        user = "robinb";
         identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };
       "vps.geheimesite.nl" = {
