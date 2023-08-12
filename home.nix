@@ -12,16 +12,17 @@
     # CLI tools
     yt-dlp
     lazygit
-    thefuck
     git-remote-gcrypt
     imagemagick
 
     # Languages
+    erlang
     elixir_1_15
     nixfmt
 
     # Graphical applications
     gnome.nautilus
+    pavucontrol
     libreoffice
     gnome.file-roller
     feh
@@ -36,7 +37,10 @@
   ];
 
   # Append .local/bin to the path
-  home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
+  home.sessionPath = [ 
+    "${config.home.homeDirectory}/.local/bin" 
+    "${config.home.homeDirectory}/.mix/escripts" 
+  ];
 
   home.shellAliases = {
     sudo = "doas";
@@ -70,15 +74,6 @@
 
   programs.fish = {
     enable = true;
-
-    shellAliases = config.home.shellAliases;
-    interactiveShellInit = ''
-      # Disable welcome message
-      set fish_greeting
-
-      # Enable amazing 'fuck' command
-      thefuck --alias | source
-    '';
   };
 
   ## XDG directories & default applications
@@ -130,8 +125,12 @@
       core = { hooksPath = "${config.home.homeDirectory}/.githooks"; };
       init = { defaultBranch = "master"; };
       pull = {
-        rebase = false;
-        ff = "only";
+        rebase = true;
+
+        # Enable this to prevent automatic rebase
+        # when pulling.
+        # rebase = false;
+        # ff = "only";
       };
       alias = {
         co = "checkout";
@@ -225,7 +224,7 @@
 
   programs.kitty = {
     enable = true;
-    shellIntegration.enableFishIntegration = true;
+    shellIntegration.enableFishIntegration = false;
 
     font = {
       name = "monospace";
@@ -237,6 +236,7 @@
       window_padding_width = 30;
       confirm_os_window_close = 0;
       repaint_delay = 0;
+      cursor_shape = "beam";
     };
   };
 

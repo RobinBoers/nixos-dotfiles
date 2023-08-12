@@ -12,6 +12,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.supportedFilesystems = [ "ntfs" ];
 
   ## Networking
 
@@ -98,7 +99,6 @@
     jq
 
     # Theming
-    adw-gtk3
     gnome.adwaita-icon-theme
 
     # Home manager
@@ -107,6 +107,9 @@
     # Needed to make VM work
     #libva
   ];
+
+  # Enable flatpaks
+  services.flatpak.enable = true;
 
   nix.settings = {
     keep-outputs = true;
@@ -136,7 +139,8 @@
 
   ## Hardware
 
-  hardware.bluetooth.enable = false; # Disable bluetooth
+  hardware.bluetooth.enable = true; # Disable bluetooth
+  powerManagement.cpuFreqGovernor = "performance"; # Make laptop go vroom
 
   # Sound
   sound.enable = true;
@@ -210,6 +214,7 @@
 
   # Desktop integration
   services.dbus.enable = true;
+  services.dbus.packages = [ pkgs.gcr ]; # Needed to make gpg-agent pinentry work
   services.xserver.updateDbusEnvironment = true; # Make dbus work in Xwayland?
   services.udisks2.enable = true;
   services.avahi.enable = true;

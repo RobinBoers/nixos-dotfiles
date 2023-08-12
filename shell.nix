@@ -32,6 +32,13 @@ in {
     };
   };
 
+  home.file.".config/fish/functions/fish_greeting.fish".text = ''
+    # Disables greeting when starting fish
+
+    function fish_greeting
+    end
+  '';
+
   home.file.".config/fish/completions/sd.fish".text = ''
     # Completions for the custom Script Directory (sd) script
 

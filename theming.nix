@@ -162,7 +162,7 @@ in {
     color15 = "#${color-scheme.color15}";
   };
 
-  programs.fish.shellInit = ''
+  programs.fish.loginShellInit = ''
     # home-manager can't handle this if I put it in
     # `home.sessionVariables` for some reason.
     export NEWT_COLORS="${newt-color-scheme}"
