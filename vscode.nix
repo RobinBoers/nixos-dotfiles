@@ -5,7 +5,7 @@ let
   extensions = (import (builtins.fetchGit {
     url = "https://github.com/nix-community/nix-vscode-extensions";
     ref = "refs/heads/master";
-    rev = "1c6da5a92510184f159dc8e73eb340331166134d";
+    rev = "64202bae6f0e86efa321cf2f925d1e72fc0a8770";
   })).extensions.${system};
 in {
   home.packages = with pkgs; [
@@ -30,7 +30,8 @@ in {
         dbaeumer.vscode-eslint
         rust-lang.rust-analyzer
         tombonnike.vscode-status-bar-format-toggle
-        jakebecker.elixir-ls
+        elixir-tools.elixir-tools
+        #jakebecker.elixir-ls
         brettm12345.nixfmt-vscode
         bbenoist.nix
         joaopalmeiro.icons-octicons
