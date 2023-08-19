@@ -23,7 +23,7 @@
     # Graphical applications
     gnome.nautilus
     pavucontrol
-    libreoffice
+    #libreoffice-fresh
     gnome.file-roller
     feh
     librewolf
@@ -42,38 +42,12 @@
     "${config.home.homeDirectory}/.mix/escripts" 
   ];
 
-  home.shellAliases = {
-    sudo = "doas";
-    sudoedit = "doas $EDITOR";
-    feh = "feh -Z --scale-down";
-    ":q" = "exit";
-    ":Q" = "exit";
-    clear = "printf '\\033[2J\\033[3J\\033[1;1H'";
-
-    # Secrets management
-    secrets =
-      "git --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
-    lsecrets =
-      "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
-
-    # Shortcuts
-    rm = "rm -ri";
-    cp = "cp -i";
-    mv = "mv -i";
-    ".." = "cd ..";
-    less = "less -QFr";
-  };
-
   home.sessionVariables = {
     DEFAULT_BROWSER = "${pkgs.librewolf}/bin/librewolf"; # Needed for Electron apps
     GTK_OVERLAY_SCROLLING = 1;
     ERL_AFLAGS = "-kernel shell_history enabled";
     ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
     DIRENV_LOG_FORMAT = ""; # Disable annoying direnv output
-  };
-
-  programs.fish = {
-    enable = true;
   };
 
   ## XDG directories & default applications
@@ -185,7 +159,7 @@
   };
 
   # This spits out an SSH_AUTH_SOCK variable, 
-  # which you have to put in the shell init.
+  # which you have to put in the env.
   services.gnome-keyring = {
     enable = true;
     components = [ "ssh" "secrets" "pkcs11" ];
@@ -220,11 +194,22 @@
     };
   };
 
+  # "dotfiles" repo for secrets, encrypted using GPG
+  home.shellAliases = {
+    # Secrets management
+    secrets =
+      "git --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
+    lsecrets =
+      "lazygit --git-dir=${config.home.homeDirectory}/.secrets/ --work-tree=${config.home.homeDirectory}";
+  };
+
   ## Graphical programs
 
   programs.kitty = {
     enable = true;
-    shellIntegration.enableFishIntegration = false;
+    shellIntegration = {
+      enableFishIntegration = false;
+    };
 
     font = {
       name = "monospace";
@@ -233,7 +218,7 @@
     settings = {
       enable_audio_bell = "no";
       remember_window_size = "no";
-      window_padding_width = 30;
+      #window_padding_width = 30;
       confirm_os_window_close = 0;
       repaint_delay = 0;
       cursor_shape = "beam";
@@ -246,6 +231,9 @@
 
     extensions = [ ]; # TODO(robin): add later!
   };
+
+  # Make Netflix work
+  nixpkgs.config.chromium.enableWideVine = true;
 
   home.file = {
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in

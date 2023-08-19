@@ -4,9 +4,27 @@ let
   script-directory = "${config.home.homeDirectory}/sd";
 in {
   home.shellAliases = {
+    sudo = "doas";
+    sudoedit = "doas $EDITOR";
     cat = "bat";
     ls = "exa";
     tree = "exa -T";
+    feh = "feh -Z --scale-down";
+    ":q" = "exit";
+    ":Q" = "exit";
+    clear = "printf '\\033[2J\\033[3J\\033[1;1H'";
+
+    # Shortcuts
+    rm = "rm -ri";
+    cp = "cp -i";
+    mv = "mv -i";
+    ".." = "cd ..";
+    less = "less -QFr";
+  };
+
+  programs.fish = {
+    enable = true;
+    shellAliases = config.home.shellAliases;
   };
 
   programs.direnv = {
@@ -17,7 +35,7 @@ in {
   programs.gh = {
     enable = true;
 
-    enableGitCredentialHelper = true;   
+    gitCredentialHelper.enable = true;   
     settings = {
       git_protocol = "ssh";
       prompt = "enabled";
