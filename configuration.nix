@@ -117,7 +117,7 @@
   };
 
   system.autoUpgrade.enable = true; # Autoupdating
-  system.autoUpgrade.allowReboot = true;
+  system.autoUpgrade.allowReboot = false;
 
   ## Security
 
@@ -140,6 +140,7 @@
   ## Hardware
 
   hardware.bluetooth.enable = true; # Disable bluetooth
+
   powerManagement.cpuFreqGovernor = "performance"; # Make laptop go vroom
 
   # Sound
@@ -288,10 +289,10 @@
   # I'd rather have these options in home-manager as well, but sadly they are only available system-wide.
 
   fonts = {
-    enableDefaultFonts = true;
+    enableDefaultPackages = true;
     fontDir.enable = true;
 
-    fonts = with pkgs; [
+    packages = with pkgs; [
       inter
       libertinus
       whatsapp-emoji-font
