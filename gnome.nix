@@ -9,6 +9,7 @@ in {
     rounded-window-corners
     dock-from-dash
     unite
+    impatience
   ];
 
   dconf.settings = {
