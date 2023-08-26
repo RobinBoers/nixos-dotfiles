@@ -122,10 +122,18 @@
     };
   };
 
-  home.file.".githooks/pre-push".text = ''
+  home.file.".githooks/pre-push" = {
+    text = ''
       #!/bin/sh
       bix pre-push
-  '';
+    '';
+    executable = true;
+  };
+
+  home.file.".local/bin/bix" = {
+    text = builtins.readFile(builtins.fetchurl "https://git.geheimesite.nl/libre0b11/bix/raw/branch/master/bix.sh");
+    executable = true;
+  };
 
   editorconfig = {
     enable = true;
@@ -234,13 +242,6 @@
 
   # Make Netflix work
   nixpkgs.config.chromium.enableWideVine = true;
-
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-  };
 
   programs.home-manager.enable = true;
 
