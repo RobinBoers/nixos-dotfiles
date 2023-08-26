@@ -140,6 +140,9 @@ in {
     sound-theme-freedesktop
   ];
 
+  home.file.".local/share/fonts/AppleColorEmoji.ttf".source =
+    builtins.fetchurl "https://github.com/samuelngs/apple-emoji-linux/releases/latest/download/AppleColorEmoji.ttf";
+
   programs.kitty.settings = {
     background = "#${color-scheme.bg}";
     foreground = "#${color-scheme.fg}";
