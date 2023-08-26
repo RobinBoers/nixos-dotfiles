@@ -5,7 +5,7 @@ let
 
   wayland-dbus-environment = let 
     environmentVariables = 
-        "SWAYSOCK \
+       ''SWAYSOCK \
          I3SOCK \
          WAYLAND_DISPLAY \
          DISPLAY \
@@ -15,7 +15,8 @@ let
          DBUS_SESSION_BUS_PID \
          DBUS_SESSION_BUS_WINDOWID \
          XAUTHORITY \
-         XDG_CURRENT_DESKTOP";
+         XDG_CURRENT_DESKTOP
+       '';
     in pkgs.writeShellScriptBin "wayland-dbus-environment" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd ${environmentVariables}
       ${pkgs.systemd}/bin/systemctl --user import-environment ${environmentVariables}
@@ -397,19 +398,6 @@ in {
   in {
     enable = true;
 
-    wrapperFeatures = {
-      gtk = true;
-      base = true;
-    };
-    extraSessionCommands = ''
-      export XDG_CURRENT_DESKTOP=gnome
-      export NIXOS_OZONE_WL=1
-      export _JAVA_AWT_WM_NOREPARENTIN=1
-      export SDL_VIDEODRIVER=wayland
-      export QT_QPA_PLATFORM=wayland
-      export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-      export MOX_ENABLE_WAYLAND=1
-    '';
     xwayland = true;
     config = {
       modifier = mod;
