@@ -121,20 +121,7 @@
       };
     };
   };
-
-  home.file.".githooks/pre-push" = {
-    text = ''
-      #!/bin/sh
-      bix pre-push
-    '';
-    executable = true;
-  };
-
-  home.file.".local/bin/bix" = {
-    text = builtins.readFile(builtins.fetchurl "https://git.geheimesite.nl/libre0b11/bix/raw/branch/master/bix.sh");
-    executable = true;
-  };
-
+ 
   editorconfig = {
     enable = true;
     settings = {
