@@ -397,6 +397,7 @@ in {
     mod = "Mod4";
   in {
     enable = true;
+    package = null; # Managed in configuration.nix
 
     xwayland = true;
     config = {
