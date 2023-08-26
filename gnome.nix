@@ -12,7 +12,7 @@ in {
 
   dconf.settings = {
     # Overview
-    "/org/gnome/shell" = {
+    "org/gnome/shell" = {
       favorite-apps = [
         "librewolf.desktop"
         "md.obsidian.Obsidian.desktop"
@@ -22,22 +22,20 @@ in {
         "code.desktop"
         "kitty.desktop"
       ];
-      # app-picker-layout = 
-      #   "[{'ad420938-9793-43d4-9a98-9de8290215e7': <{'position': <0>}>, 'io.github.celluloid_player.Celluloid.desktop': <{'position': <1>}>, '8f6f1753-4a0a-4b8b-b46a-e6dad4856503': <{'position': <2>}>, 'Utilities': <{'position': <3>}>, 'chromium-browser.desktop': <{'position': <4>}>, 'org.gnome.Settings.desktop': <{'position': <5>}>, 'org.gnome.Extensions.desktop': <{'position': <6>}>, 'filezilla.desktop': <{'position': <7>}>, 'org.yuzu_emu.yuzu.desktop': <{'position': <8>}>, 'org.gnome.Software.desktop': <{'position': <9>}>, 'com.valvesoftware.Steam.desktop': <{'position': <10>}>, '04d85809-519b-4ace-81cf-14d177ef44c4': <{'position': <11>}>}]";
     };
 
     # Wallpaper
-    "/org/gnome/desktop/background" = {
-      picture-uri = "/run/current-system/sw/share/backgrounds/gnome/${wallpaper}-l.svg";
-      picture-uri-dark = "/run/current-system/sw/share/backgrounds/gnome/${wallpaper}-d.svg";
+    "org/gnome/desktop/background" = {
+      picture-uri = "file:///run/current-system/sw/share/backgrounds/gnome/${wallpaper}-l.svg";
+      picture-uri-dark = "file:///run/current-system/sw/share/backgrounds/gnome/${wallpaper}-d.svg";
     };
 
     # Input
-    "/org/gnome/desktop/peripherals/touchpad" = {
+    "org/gnome/desktop/peripherals/touchpad" = {
       tap-to-click = true;
     };
-    "/org/gnome/desktop/input-sources" = {
-      sources = "[('xkb', 'us+euro')]";
+    "org/gnome/desktop/input-sources" = {
+      # sources = "[('xkb', 'us+euro')]";
       # sources = "[('xkb', 'us+intl')]";
     };
     "org/gnome/desktop/interface" = {
@@ -45,20 +43,40 @@ in {
     };
 
     # Keybindings
-    "/org/gnome/desktop/wm/keybindings" = {
+    "org/gnome/desktop/wm/keybindings" = {
       close = [ "<Super>q" ];
       screenshot = [ "<Shift><Super>s" ];
       panel-run-dialog = [ "<Super>r" ];
       logout = [ "<Control><Alt>q" ];
+      move-to-workspace-1 = [ "<Shift><Super>1" ];
+      move-to-workspace-2 = [ "<Shift><Super>2" ];
+      move-to-workspace-3 = [ "<Shift><Super>3" ];
+      move-to-workspace-4 = [ "<Shift><Super>4" ];
+      move-to-workspace-5 = [ "<Shift><Super>5" ];
+      move-to-workspace-6 = [ "<Shift><Super>6" ];
+      move-to-workspace-7 = [ "<Shift><Super>7" ];
+      move-to-workspace-8 = [ "<Shift><Super>8" ];
+      move-to-workspace-9 = [ "<Shift><Super>9" ];
+      move-to-workspace-10 = [ "<Shift><Super>0" ];
+      switch-to-application-1 = [ "<Super>1" ];
+      switch-to-application-2 = [ "<Super>2" ];
+      switch-to-application-3 = [ "<Super>3" ];
+      switch-to-application-4 = [ "<Super>4" ];
+      switch-to-application-5 = [ "<Super>5" ];
+      switch-to-application-6 = [ "<Super>6" ];
+      switch-to-application-7 = [ "<Super>7" ];
+      switch-to-application-8 = [ "<Super>8" ];
+      switch-to-application-9 = [ "<Super>9" ];
+      switch-to-application-10 = [ "<Super>0" ];
     };
-    "/org/gnome/settings-daemon/plugins/media-keys" = {
+    "org/gnome/settings-daemon/plugins/media-keys" = {
       play = [ "<Super>p" ];
       next = [ "<Shift><Super>period" ];
       prev = [ "<Shift><Super>comma" ];
     };
 
     # Custom keybindings
-    "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
       name = "Open terminal";
       binding = "<Super>Return";
       command = terminal;
