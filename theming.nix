@@ -134,8 +134,10 @@ let
 in {
   home.packages = with pkgs; [
     gtk3-darkmode-daemon
+    gnome.adwaita-icon-theme
     adw-gtk3
     vanilla-dmz
+    sound-theme-freedesktop
   ];
 
   programs.kitty.settings = {

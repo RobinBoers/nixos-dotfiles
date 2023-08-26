@@ -15,7 +15,7 @@ let
          DBUS_SESSION_BUS_PID \
          DBUS_SESSION_BUS_WINDOWID \
          XAUTHORITY \
-         DG_CURRENT_DESKTOP=sway";
+         XDG_CURRENT_DESKTOP";
     in pkgs.writeShellScriptBin "wayland-dbus-environment" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd ${environmentVariables}
       ${pkgs.systemd}/bin/systemctl --user import-environment ${environmentVariables}
@@ -37,20 +37,13 @@ let
     | ${pkgs.wl-clipboard}/bin/wl-copy && ${pkgs.wl-clipboard}/bin/wl-paste \
     > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
   '';
-
-  # Since gnome-control-center and GNOME wallpapers in general
-  # don't work yet, I hard-code the wallpaper path here for now.
-
-  # ''
-  #   ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
-  #   | ${pkgs.coreutils}/bin/cut -c 9- \
-  #   | ${pkgs.util-linux}/bin/rev \
-  #   | ${pkgs.coreutils}/bin/cut -c 2- \
-  #   | ${pkgs.util-linux}/bin/rev
-  # '';
-
+ 
   wayland-get-wallpaper = pkgs.writeShellScriptBin "wayland-get-wallpaper" ''
-    echo /home/robin/pictures/wallpaper.jpg
+    ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
+    | ${pkgs.coreutils}/bin/cut -c 9- \
+    | ${pkgs.util-linux}/bin/rev \
+    | ${pkgs.coreutils}/bin/cut -c 2- \
+    | ${pkgs.util-linux}/bin/rev
   '';
 
   ## Global
@@ -81,10 +74,16 @@ in {
     autotiling
     swayest-workstyle
     wob
-
-    # Misc
-    gsettings-desktop-schemas # Used in `wayland-gsettings`.
     sound-theme-freedesktop # Used in mako config.
+
+    # GNOME services
+    xdg-utils # for opening programs using custom handlers (steam:// etc.)
+    glib # gsettings support
+    gnome.gnome-session
+    gnome.gnome-control-center
+    qt5.qtwayland
+    polkit_gnome
+    gsettings-desktop-schemas # Used in `wayland-gsettings`.
   ];
 
   programs.foot.enable = false; # Don't install foot!!
@@ -336,7 +335,7 @@ in {
   systemd.user.services.playerctld = {
     Unit = {
       Description = "Control media players via MPRIS";
-      Documentation = [ "man:playerctl(1)" ];
+      Documentation = [ "man:polkit(1)" ];
       PartOf = "graphical-session.target";
     };
     Service = {
@@ -346,13 +345,69 @@ in {
     Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
+  ## GNOME services
+
+  systemd.user.targets.gnome-services = {
+    Unit = {
+      Description = "GNOME services";
+      Documentation = [ "man:systemd.special(7)" ];
+      PartOf = "graphical-session.target";
+      RefuseManualStart = false;
+      StopWhenUnneeded = true;
+      Requires = [ "basic.target" ];
+    };
+    Install = { 
+      WantedBy = [ sway-systemd-target ]; 
+
+      # Starting GSD doesn't work unfortunately. NixOS masks the GSD systemd files for some reason, probably to prevent hacky setups like this. I tried unmasking using `systemd.user.targets.<name>.enable = true;`, but that didn't work out. I just got the message to run `systemctl --user daemon-reload`, and that didn't do anything (it didn't unmask the units and it also didn't make the message go away).
+
+      # I'll let this be for the moment (which sucks because now I can't use gnome-control-center for Wifi or Bluetooth or appearance settings).
+
+      Wants = [
+        "gsd-housekeeping.target"
+        "gsd-xsettings.target"
+        "gsd-datetime.target"
+        "gsd-print-notifications.target"
+        "gsd-rfkill.target"
+        "gsd-usb-protection.target"
+        "gsd-wacom.target"
+        "gsd-wwan.target"
+      ];
+    };
+  };
+
+  systemd.user.services.gnome-polkit = {
+    Unit = {
+      Description = "Legacy polkit authentication agent for GNOME";
+      Documentation = [ "man:playerctl(1)" ];
+      PartOf = "graphical-session.target";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+    };
+    Install = { WantedBy = [ gnome-services-systemd-target ]; };
+  };
+
   ## Window manager
 
   wayland.windowManager.sway = let mod = "Mod4";
   in {
     enable = true;
-    package = null; # Managed in configuration.nix
 
+    wrapperFeatures = {
+      gtk = true;
+      base = true;
+    };
+    extraSessionCommands = ''
+      export XDG_CURRENT_DESKTOP=gnome
+      export NIXOS_OZONE_WL=1
+      export _JAVA_AWT_WM_NOREPARENTIN=1
+      export SDL_VIDEODRIVER=wayland
+      export QT_QPA_PLATFORM=wayland
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+      export MOX_ENABLE_WAYLAND=1
+    '';
     xwayland = true;
     config = {
       modifier = mod;
