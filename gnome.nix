@@ -8,6 +8,7 @@ in {
     blur-my-shell
     rounded-window-corners
     dock-from-dash
+    unite
   ];
 
   dconf.settings = {
