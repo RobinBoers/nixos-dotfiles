@@ -3,19 +3,22 @@
 let
   ## Custom binaries
 
-  wayland-dbus-environment =
-    pkgs.writeShellScriptBin "wayland-dbus-environment" ''
-      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SWAYSOCK \
-        I3SOCK \
-        WAYLAND_DISPLAY \
-        DISPLAY \
-        XCURSOR_SIZE \
-        XCURSOR_THEME \
-        DBUS_SESSION_BUS_ADDRESS \
-        DBUS_SESSION_BUS_PID \
-        DBUS_SESSION_BUS_WINDOWID \
-        XAUTHORITY \
-        DG_CURRENT_DESKTOP=sway
+  wayland-dbus-environment = let 
+    environmentVariables = 
+        "SWAYSOCK \
+         I3SOCK \
+         WAYLAND_DISPLAY \
+         DISPLAY \
+         XCURSOR_SIZE \
+         XCURSOR_THEME \
+         DBUS_SESSION_BUS_ADDRESS \
+         DBUS_SESSION_BUS_PID \
+         DBUS_SESSION_BUS_WINDOWID \
+         XAUTHORITY \
+         DG_CURRENT_DESKTOP=sway";
+    in pkgs.writeShellScriptBin "wayland-dbus-environment" ''
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd ${environmentVariables}
+      ${pkgs.systemd}/bin/systemctl --user import-environment ${environmentVariables}
 
       ${pkgs.systemd}/bin/systemctl --user stop pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
       ${pkgs.systemd}/bin/systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
@@ -264,6 +267,7 @@ in {
     enable = true;
     anchor = "top-right";
     defaultTimeout = 10000;
+    # Uncomment this to enable notification sounds
     # extraConfig = [
     #   "on-notify=exec mpv /usr/share/sounds/freedesktop/stereo/message.oga"
     # ]
@@ -322,10 +326,11 @@ in {
     };
     Service = {
       Type = "oneshot";
+      Restart = "on-failure";
       ExecStart =
         "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
     };
-    Install = { Requires = [ sway-systemd-target ]; };
+    Install = { WantedBy = [ sway-systemd-target ]; };
   };
 
   systemd.user.services.playerctld = {
