@@ -212,8 +212,8 @@
     settings = {
       enable_audio_bell = "no";
       remember_window_size = "no";
-      initial_window_width = 900;
-      initial_window_height = 600;
+      initial_window_width = 1200;
+      initial_window_height = 700;
       #window_padding_width = 30;
       confirm_os_window_close = 0;
       repaint_delay = 0;
