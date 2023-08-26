@@ -141,7 +141,7 @@
 
   hardware.bluetooth.enable = true; # Disable bluetooth
 
-  powerManagement.cpuFreqGovernor = "performance"; # Make laptop go vroom
+  powerManagement.cpuFreqGovernor = "performance";
 
   # Sound
   sound.enable = true;
@@ -187,6 +187,32 @@
     #package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
   };
 
+  ## GNOME
+
+  services.xserver.enable = true;
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome.enable = true;
+
+  # Don't install default applications
+  environment.excludePackages = (with pkgs; [
+    gnome-photos
+    gnome-tour
+  ]) ++ (with pkgs.gnome; [
+    cheese
+    gnome-music
+    gedit
+    epiphany
+    geary
+    gnome-characters
+    tali
+    iagno
+    hitori
+    atomix
+    yelp
+    gnome-contacts
+    gnome-initial-setup
+  ]);
+
   ## Graphical session (Sway + GNOME services)
 
   programs.sway = {
@@ -215,17 +241,15 @@
 
   # Desktop integration
   services.dbus.enable = true;
-  services.dbus.packages = [ pkgs.gcr ]; # Needed to make gpg-agent pinentry work
+  services.dbus.packages = [ pkgs.gcr ]; # Needed to make gpg pinentry work
   services.xserver.updateDbusEnvironment = true; # Make dbus work in Xwayland?
   services.udisks2.enable = true;
   services.avahi.enable = true;
   services.gvfs.enable = true;
   xdg.mime.enable = true;
   xdg.icons.enable = true;
-  xdg.portal.enable = true;
-  xdg.portal.wlr.enable = true;
-  xdg.portal.extraPortals =
-    [ pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
+  #xdg.portal.enable = true;
+  #xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
 
   # Settings
   programs.dconf.enable = true;

@@ -4,7 +4,7 @@
   home.username = "robin";
   home.homeDirectory = "/home/robin";
 
-  imports = [ ./sway.nix ./neovim.nix ./vscode.nix ./shell.nix ./theming.nix ];
+  imports = [ ./sway.nix ./gnome.nix ./neovim.nix ./vscode.nix ./shell.nix ./theming.nix ];
 
   nixpkgs.config.allowUnfree = true; # Allow unfree packages
 
@@ -22,18 +22,17 @@
 
     # Graphical applications
     gnome.nautilus
-    pavucontrol
-    #libreoffice-fresh
-    gnome.file-roller
+    #pavucontrol
+    libreoffice-fresh
     feh
     librewolf
     ungoogled-chromium
-    baobab
+    #baobab
     celluloid
     filezilla
     spotify
     discord
-    minecraft
+    #minecraft
   ];
 
   # Append .local/bin to the path
