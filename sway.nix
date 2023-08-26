@@ -51,6 +51,7 @@ let
   terminal = "${pkgs.kitty}/bin/kitty";
   color-scheme.dark = "14141d";
   sway-systemd-target = "sway-session.target";
+  gnome-services-systemd-target = "gnome-services.target";
 
 in {
   ## Packages
@@ -391,7 +392,8 @@ in {
 
   ## Window manager
 
-  wayland.windowManager.sway = let mod = "Mod4";
+  wayland.windowManager.sway = let 
+    mod = "Mod4";
   in {
     enable = true;
 
