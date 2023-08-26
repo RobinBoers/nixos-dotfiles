@@ -193,23 +193,38 @@
   services.xserver.desktopManager.gnome.enable = true;
 
   # Don't install default applications
-  environment.excludePackages = (with pkgs; [
+  environment.gnome.excludePackages = (with pkgs; [
     gnome-photos
+    gnome-connections
     gnome-tour
+    gnome-console
+    gnome-text-editor
   ]) ++ (with pkgs.gnome; [
-    cheese
-    gnome-music
     gedit
-    epiphany
     geary
-    gnome-characters
     tali
     iagno
     hitori
     atomix
-    yelp
+    simple-scan
+    totem
+    baobab
+    cheese
+    eog
+    epiphany
+    gnome-calculator
+    gnome-calendar
+    gnome-characters
+    gnome-clocks
     gnome-contacts
+    gnome-font-viewer
+    gnome-logs
+    gnome-maps
+    gnome-music
+    gnome-system-monitor
     gnome-initial-setup
+    gnome-weather
+    yelp
   ]);
 
   ### Sway + GNOME services
@@ -225,7 +240,14 @@
   xdg.icons.enable = true;
   xdg.portal.enable = true;
   xdg.portal.extraPortals = 
-    [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ]; # GTK portal needed to make GTK apps happy
+    [ 
+      pkgs.xdg-desktop-portal-wlr 
+      pkgs.xdg-desktop-portal-gnome
+      (pkgs.xdg-desktop-portal-gtk.override {
+        # Do not build portals that we already have.
+        buildPortalsInGnome = false;
+      })
+    ]; # GTK portal needed to make GTK apps happy
 
   # Settings
   programs.dconf.enable = true;
