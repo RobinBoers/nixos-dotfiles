@@ -208,7 +208,7 @@
     font = {
       name = "monospace";
       size = 15;
-    };
+    }; 
     settings = {
       enable_audio_bell = "no";
       remember_window_size = "no";
@@ -216,6 +216,7 @@
       confirm_os_window_close = 0;
       repaint_delay = 0;
       cursor_shape = "beam";
+      linux_display_server = "x11";
     };
   };
 

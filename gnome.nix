@@ -2,6 +2,7 @@
 
 let 
   terminal = "${pkgs.kitty}/bin/kitty";
+  wallpaper = "dune"; 
 in {
   home.packages = with pkgs.gnomeExtensions; [
     blur-my-shell
@@ -9,9 +10,7 @@ in {
     dock-from-dash
   ];
 
-  dconf.settings = let 
-    wallpaper = "dune"; 
-  in {
+  dconf.settings = {
     # Overview
     "/org/gnome/shell" = {
       favorite-apps = [
