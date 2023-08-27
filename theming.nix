@@ -97,6 +97,10 @@ let
   '';
 
   gtk3-theme = "adw-gtk3";
+  cursor-theme = "Vanilla-DMZ";
+  font = "Inter";
+  gtk3-theme-package = pkgs.adw-gtk3;
+  cursor-theme-package = pkgs.vanilla-dmz;
 
   gtk3-darkmode-daemon = let
     # TODO(robin): refactor this.
@@ -131,9 +135,9 @@ let
 in {
   home.packages = with pkgs; [
     gtk3-darkmode-daemon
+    gtk3-theme-package
+    cursor-theme-package
     gnome.adwaita-icon-theme
-    adw-gtk3
-    vanilla-dmz
     sound-theme-freedesktop
   ];
 
@@ -215,8 +219,8 @@ in {
     };
 
     cursorTheme = {
-      package = pkgs.vanilla-dmz;
-      name = "Vanilla-DMZ";
+      package = cursor-theme-package;
+      name = cursor-theme;
     };
   };
 
@@ -234,13 +238,14 @@ in {
   };
 
   dconf.settings."org/gnome/desktop/interface" = {
-    font-name = "Inter";
-    document-font-name = "Inter";
+    font-name = font;
+    document-font-name = font;
     font-antialiasing = "grayscale";
     font-hinting = "slight";
+    cursor-theme = cursor-theme;
   };
 
   # For GTK2 apps
   home.file.".local/share/icons/default".source = 
-    "${pkgs.vanilla-dmz}/share/icons/Vanilla-DMZ"; 
+    "${cursor-theme-package}/share/icons/${cursor-theme}"; 
 }
