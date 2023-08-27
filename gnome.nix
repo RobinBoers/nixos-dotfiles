@@ -12,6 +12,19 @@ in {
     impatience
   ];
 
+  home.file.".local/share/applications/gnome-control-center.desktop".text = ''
+    [Desktop Entry]
+    Name=Settings
+    Icon=preferences-system
+    Exec=gnome-control-center
+    Terminal=false
+    Type=Application
+    StartupNotify=true
+    Categories=GNOME;GTK;Settings;
+    Keywords=Preferences;Settings;
+    NotShowIn=GNOME;
+  '';
+
   dconf.settings = {
     # Overview
     "org/gnome/shell" = {
