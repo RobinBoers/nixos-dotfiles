@@ -39,12 +39,44 @@ let
     > ~/pictures/screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
   '';
  
-  wayland-get-wallpaper = pkgs.writeShellScriptBin "wayland-get-wallpaper" ''
-    ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background picture-uri \
+  wayland-get-wallpaper = pkgs.writeShellScriptBin "wayland-get-wallpaper" ''    
+    SCHEME=$(${pkgs.glib}/bin/gsettings get org.gnome.desktop.interface color-scheme)
+
+    if [ "$SCHEME" == "'default'" ]; then
+      PROPERTY="picture-uri"
+    else
+      PROPERTY="picture-uri-dark"
+    fi
+
+    ${pkgs.glib}/bin/gsettings get org.gnome.desktop.background $PROPERTY \
     | ${pkgs.coreutils}/bin/cut -c 9- \
     | ${pkgs.util-linux}/bin/rev \
     | ${pkgs.coreutils}/bin/cut -c 2- \
     | ${pkgs.util-linux}/bin/rev
+  '';
+
+  wayland-wallpaper-daemon = let
+    # TODO(robin): refactor this.
+    # This is currently duplicated from `wayland-gsettings`.
+
+    schema = pkgs.gsettings-desktop-schemas;
+    datadir = "${schema}/share/gsettings-schemas/${schema.name}";
+  in pkgs.writeShellScriptBin "wayland-wallpaper-daemon" ''
+    export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
+
+    ${pkgs.coreutils}/bin/rm /tmp/gtk-theme-changes /tmp/wallpaper-changes
+
+    ${pkgs.coreutils}/bin/mkfifo /tmp/gtk-theme-changes
+    ${pkgs.coreutils}/bin/mkfifo /tmp/wallpaper-changes 
+
+    # Monitor gsettings to resync when the color scheme and background changes
+    ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.interface color-scheme > /tmp/gtk-theme-changes 2>&1 &
+    ${pkgs.glib}/bin/gsettings monitor org.gnome.desktop.background picture-uri > /tmp/wallpaper-changes 2>&1 &
+
+    while IPS= read -r line1 <&3 && IPS= read -r line2 <&4; do
+      echo "Wallpaper changed. Applying..."
+      ${pkgs.systemd}/bin/systemctl start --user swaybg.service
+    done 3</tmp/gtk-theme-changes 4</tmp/wallpaper-changes 
   '';
 
   ## Global
@@ -62,6 +94,7 @@ in {
     wayland-gsettings
     wayland-screenshot
     wayland-get-wallpaper
+    wayland-wallpaper-daemon
 
     # Utilities
     grim
@@ -330,6 +363,19 @@ in {
       Restart = "on-failure";
       ExecStart =
         "/bin/sh -c '${pkgs.sway}/bin/swaymsg output \\* bg $(${wayland-get-wallpaper}/bin/wayland-get-wallpaper) fill'";
+    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
+  };
+
+  systemd.user.services.wayland-wallpaper-daemon = {
+    Unit = {
+      Description = "Simple daemon rerun swaybg when the GNOME wallpaper changes";
+      PartOf = "graphical-session.target";
+      Requires = [ "swaybg.service" ];
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${wayland-wallpaper-daemon}/bin/wayland-wallpaper-daemon";
     };
     Install = { WantedBy = [ sway-systemd-target ]; };
   };

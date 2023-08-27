@@ -105,14 +105,11 @@ let
     schema = pkgs.gsettings-desktop-schemas;
     datadir = "${schema}/share/gsettings-schemas/${schema.name}";
   in pkgs.writeShellScriptBin "gtk3-darkmode-daemon" ''
-    #!/bin/sh
-
     export XDG_DATA_DIRS=${datadir}:$XDG_DATA_DIRS
 
     sync_darkmode() {
       GNOME_SCHEMA="org.gnome.desktop.interface"
       SCHEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA color-scheme)
-      THEME=$(${pkgs.glib}/bin/gsettings get $GNOME_SCHEMA gtk-theme)
 
       if [ "$SCHEME" == "'default'" ]; then
         ${pkgs.glib}/bin/gsettings set $GNOME_SCHEMA gtk-theme "${gtk3-theme}"
