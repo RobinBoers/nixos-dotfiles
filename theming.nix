@@ -233,20 +233,12 @@ in {
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # Sway-specific
-  # TODO(robin): a way to make this desktop-agnostic?
-  wayland.windowManager.sway.config.startup = 
-    let gnome-schema = "org.gnome.desktop.interface"; in [
-      # Font settings
-      { command = "gsettings set ${gnome-schema} font-name 'Inter'"; }
-      { command = "gsettings set ${gnome-schema} document-font-name 'Inter'"; }
-      { command = "gsettings set ${gnome-schema} font-antialiasing 'grayscale'"; }
-      { command = "gsettings set ${gnome-schema} font-hinting 'slight'"; }
-
-      # Set GTK theming
-      # TODO(robin): replace this with a time-based daemon later.
-      { command = "gsettings set org.gnome.desktop.interface color-scheme 'default'"; }
-    ];
+  dconf.settings."org/gnome/desktop/interface" = {
+    font-name = "Inter";
+    document-font-name = "Inter";
+    font-antialiasing = "grayscale";
+    font-hinting = "slight";
+  };
 
   # For GTK2 apps
   home.file.".local/share/icons/default".source = 
