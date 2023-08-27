@@ -99,7 +99,6 @@ in {
     # Utilities
     grim
     slurp
-    clipman
     playerctl
     wl-clipboard
     pulseaudio
@@ -293,6 +292,13 @@ in {
       event = "before-sleep";
       command = "swaylock --image $(wayland-get-wallpaper)";
     }];
+  };
+
+  # Clipboard using clipman
+  # (binds to systemd)
+  services.clipman = {
+    enable = true;
+    systemdTarget = sway-systemd-target;
   };
 
   # Notification daemon
@@ -587,9 +593,7 @@ in {
       startup = [
         # Setup wayland session
         { command = "wayland-dbus-environment"; }
-        {
-          command = "wayland-gsettings";
-        }
+        { command = "wayland-gsettings"; }
 
         # Disable audible bell
         {
@@ -603,11 +607,6 @@ in {
         {
           command =
             "convert -size 1920x60 xc:transparent -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+0 'Type password to unlock' /tmp/locktext.png";
-        }
-
-        # Clipboard
-        {
-          command = "wl-paste -t text --watch clipman store";
         }
 
         # Wallpaper
