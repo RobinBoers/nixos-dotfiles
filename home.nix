@@ -232,6 +232,19 @@
   # Make Netflix work
   nixpkgs.config.chromium.enableWideVine = true;
 
+  # Shortcuts for my app menu
+
+  home.file.".local/share/applications/element.desktop".text = ''
+    [Desktop Entry]
+    Name=Element
+    Description=Matrix messenger
+    Icon=librewolf
+    Exec=librewolf https://app.element.io
+    Terminal=false
+    Type=Application
+    StartupNotify=true
+  '';
+
   programs.home-manager.enable = true;
 
   # This value determines the Home Manager release that your configuration is
