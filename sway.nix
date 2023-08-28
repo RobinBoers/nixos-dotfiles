@@ -111,16 +111,10 @@ in {
     sound-theme-freedesktop # Used in mako config.
 
     # GNOME services
-    xdg-utils # for opening programs using custom handlers (steam:// etc.)
-    glib # gsettings support
-    gnome.gnome-session
     gnome.gnome-control-center
-    qt5.qtwayland
     polkit_gnome
     gsettings-desktop-schemas # Used in `wayland-gsettings`.
   ];
-
-  programs.foot.enable = false; # Don't install foot!!
 
   ## Launcher
 

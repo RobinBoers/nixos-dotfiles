@@ -12,7 +12,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.supportedFilesystems = [ "ntfs" ];
+  boot.supportedFilesystems = [ "ntfs" ]; # NTFS support
 
   ## Networking
 
@@ -33,8 +33,7 @@
   ## Locale
 
   time.timeZone = "Europe/Amsterdam";
-
-  i18n.defaultLocale = "en_US.UTF-8"; # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "nl_NL.UTF-8";
@@ -108,12 +107,15 @@
   # Enable flatpaks
   services.flatpak.enable = true;
 
+  # Needed for direnv + nix-shell
+  # to prevent invalidating caches.
   nix.settings = {
     keep-outputs = true;
     keep-derivations = true;
   };
 
-  system.autoUpgrade.enable = true; # Autoupdating
+  # Autoupdating
+  system.autoUpgrade.enable = true; 
   system.autoUpgrade.allowReboot = false;
 
   ## Security
@@ -130,8 +132,7 @@
     persist = true;
   }];
 
-  security.polkit.enable =
-    true; # Use polkit for access to shutdown, reboot etc.
+  security.polkit.enable = true; # Use polkit for access to shutdown, reboot etc.
 
   ## Hardware
 
@@ -165,8 +166,7 @@
       {
         keys = [ 224 ];
         events = [ "key" ];
-        # Use minimum brightness 0.1 so the display won't go totally black.
-        command = "${light} -N 0.1 && ${light} -U ${step}";
+        command = "${light} -N 0.1 && ${light} -U ${step}"; # Use minimum brightness 0.1 so the display won't go totally black.
       }
       {
         keys = [ 225 ];
@@ -235,6 +235,12 @@
       gtk = true;
       base = true;
     };
+    extraPackages = with pkgs; [
+      xdg-utils # for opening programs using custom handlers (steam:// etc.)
+      glib # gsettings support
+      gnome.gnome-session
+      qt5.qtwayland
+    ];
     extraSessionCommands = ''
       export XDG_CURRENT_DESKTOP=gnome
       export NIXOS_OZONE_WL=1
@@ -259,12 +265,14 @@
   xdg.portal.extraPortals = 
     [ 
       pkgs.xdg-desktop-portal-wlr 
+      
+      # GTK portal needed to make GTK apps happy
       pkgs.xdg-desktop-portal-gnome
       (pkgs.xdg-desktop-portal-gtk.override {
         # Do not build portals that we already have.
         buildPortalsInGnome = false;
       })
-    ]; # GTK portal needed to make GTK apps happy
+    ];
 
   # Settings
   programs.dconf.enable = true;
@@ -274,9 +282,7 @@
   programs.seahorse.enable = true;
   security.pam.services.login.enableGnomeKeyring = true;
   security.pam.services.passwd.enableGnomeKeyring = true;
-
-  # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
-  services.gnome.at-spi2-core.enable = true; 
+  services.gnome.at-spi2-core.enable = true; # To prevent "The name org.a11y.Bus was not provided by any .service files." when starting gnome polkit.
 
   ## Fonts
 
