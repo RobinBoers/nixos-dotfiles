@@ -69,7 +69,7 @@
     description = "Robin Boers";
     hashedPassword =
       "$y$j9T$oXO6uosfLDvrfO6O.apcw1$kSheV9P3BqVlDZJdFfMQdBVeubp3KC/kLbVoLKdoMPB";
-    extraGroups = [ "wheel" "networkmanager" "video" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "input" ];
     packages = with pkgs; [ ];
   };
 

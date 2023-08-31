@@ -109,6 +109,7 @@ in {
     swayest-workstyle
     wob
     sound-theme-freedesktop # Used in mako config.
+    libinput-gestures
 
     # GNOME services
     gnome.gnome-control-center
@@ -307,6 +308,13 @@ in {
     # ]
   };
 
+  # Touchpad gestures
+  # (doesn't bind to systemd, see below)
+  home.file.".config/libinput-gestures/sway.conf".text = ''
+    gesture swipe right 3 swaymsg workspace next
+    gesture swipe left 3 swaymsg workspace prev
+  '';
+
   # Create systemd service files for services
   # that don't bind to systemd themselves.
 
@@ -325,6 +333,19 @@ in {
     };
     Install = { WantedBy = [ sway-systemd-target ]; };
   };
+
+  systemd.user.services.libinput-gestures = {
+    Unit = {
+      Description = "Actions gestures on your touchpad using libinput";
+      Documentation = [ "man:libinput(1)" ];
+      PartOf = "graphical-session.target";
+    };
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.libinput-gestures}/bin/libinput-gestures -c ${config.home.homeDirectory}/.config/libinput-gestures/sway.conf";
+    };
+    Install = { WantedBy = [ sway-systemd-target ]; };
+  }; 
 
   systemd.user.services.autotiling = {
     Unit = {
@@ -435,7 +456,7 @@ in {
       ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
     };
     Install = { WantedBy = [ gnome-services-systemd-target ]; };
-  };
+  }; 
 
   ## Window manager
 
@@ -701,5 +722,5 @@ in {
       disable-caps-lock-text = true;
       text-caps-lock-color = "009ddc";
     };
-  };
+  }; 
 }
