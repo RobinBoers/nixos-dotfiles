@@ -311,8 +311,8 @@ in {
   # Touchpad gestures
   # (doesn't bind to systemd, see below)
   home.file.".config/libinput-gestures/sway.conf".text = ''
-    gesture swipe right 3 swaymsg workspace next
-    gesture swipe left 3 swaymsg workspace prev
+    gesture: swipe right 3 ${pkgs.sway}/bin/swaymsg workspace next
+    gesture: swipe left 3 ${pkgs.sway}/bin/swaymsg workspace prev
   '';
 
   # Create systemd service files for services
