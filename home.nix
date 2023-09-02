@@ -30,6 +30,7 @@
     #baobab
     celluloid
     filezilla
+    thunderbird
     spotify
     discord
     #minecraft
