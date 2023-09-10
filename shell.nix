@@ -7,9 +7,8 @@ in {
     sudo = "doas";
     sudoedit = "doas $EDITOR";
     cat = "bat";
-    ls = "exa";
-    tree = "exa -T";
     feh = "feh -Z --scale-down";
+    tree = "exa -T";
     ":q" = "exit";
     ":Q" = "exit";
     clear = "printf '\\033[2J\\033[3J\\033[1;1H'";
@@ -171,7 +170,7 @@ in {
     };
   };
 
-  programs.exa = {
+  programs.eza = {
     enable = true;
 
     enableAliases = true;

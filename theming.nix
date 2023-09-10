@@ -168,11 +168,40 @@ in {
     color15 = "#${color-scheme.color15}";
   };
 
-  programs.fish.loginShellInit = ''
-    # home-manager can't handle this if I put it in
-    # `home.sessionVariables` for some reason.
-    export NEWT_COLORS="${newt-color-scheme}"
+  programs.alacritty.settings.colors = {
+    primary = {
+      background = "0x${color-scheme.bg}";
+      foreground = "0x${color-scheme.fg}";
+    };
+    cursor = {
+      text = "0x${color-scheme.bg}";
+      cursor = "0x${color-scheme.fg}"; 
+    };
+    normal = {
+      black = "0x${color-scheme.color0}";
+      red = "0x${color-scheme.color1}";
+      green = "0x${color-scheme.color2}";
+      yellow = "0x${color-scheme.color3}";
+      blue = "0x${color-scheme.color4}";
+      magenta = "0x${color-scheme.color5}";
+      cyan = "0x${color-scheme.color6}";
+      white = "0x${color-scheme.color7}";
+    };
+    bright = {
+      black = "0x${color-scheme.color8}";
+      red = "0x${color-scheme.color9}";
+      green = "0x${color-scheme.color10}";
+      yellow = "0x${color-scheme.color11}";
+      blue = "0x${color-scheme.color12}";
+      magenta = "0x${color-scheme.color13}";
+      cyan = "0x${color-scheme.color14}";
+      white = "0x${color-scheme.color15}";
+    };
+  };
 
+  home.sessionVariables.NEWT_COLORS = newt-color-scheme;
+
+  programs.fish.loginShellInit = ''
     # Fancy TTY color scheme.
     if test $TERM = "linux"
       echo -e "

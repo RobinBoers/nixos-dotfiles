@@ -32,6 +32,7 @@ in {
         tombonnike.vscode-status-bar-format-toggle
         elixir-tools.elixir-tools
         #jakebecker.elixir-ls
+        ziglang.vscode-zig
         brettm12345.nixfmt-vscode
         bbenoist.nix
         joaopalmeiro.icons-octicons

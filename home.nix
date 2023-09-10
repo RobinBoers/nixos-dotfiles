@@ -18,6 +18,7 @@
     # Languages
     erlang
     elixir_1_15
+    zig
     nixfmt
 
     # Graphical applications
@@ -203,7 +204,7 @@
   programs.kitty = {
     enable = true;
     shellIntegration = {
-      enableFishIntegration = false;
+      enableFishIntegration = true;
     };
 
     font = {
@@ -220,6 +221,24 @@
       repaint_delay = 0;
       cursor_shape = "beam";
       linux_display_server = "x11";
+    };
+  };
+
+  programs.alacritty = {
+    enable = true;
+    settings = {
+      window = {
+        dynamic_title = false;
+        title = "Alacritty";
+        live_config_reload = true;
+        decorations_theme_variant = "Dark";
+      };
+      scrolling = {
+        history = 10000;
+        auto_scroll = true;
+        tabspaces = 4;
+      };
+      env = { WINIT_X11_SCALE_FACTOR = "1"; };
     };
   };
 
