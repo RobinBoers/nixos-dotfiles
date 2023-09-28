@@ -5,7 +5,7 @@ let
   extensions = (import (builtins.fetchGit {
     url = "https://github.com/nix-community/nix-vscode-extensions";
     ref = "refs/heads/master";
-    rev = "d11ffab0c514009179dbcdfee1c397bfaec2f2d4";
+    rev = "d1470e1d5e6b9ac7b6bad5c46e72fb09a254af55";
   })).extensions.${system};
 in {
   home.packages = with pkgs; [
