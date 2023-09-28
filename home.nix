@@ -18,23 +18,20 @@
     # Languages
     erlang
     elixir_1_15
-    zig
     nixfmt
 
     # Graphical applications
     gnome.nautilus
-    #pavucontrol
     libreoffice-fresh
     feh
     librewolf
     ungoogled-chromium
-    #baobab
     celluloid
     filezilla
     thunderbird
     spotify
     discord
-    #minecraft
+    cinny-desktop
   ];
 
   # Append .local/bin to the path
@@ -246,7 +243,16 @@
     enable = true;
     package = pkgs.ungoogled-chromium;
 
-    extensions = [ ]; # TODO(robin): add later!
+    extensions = [
+      { id = "eimadpbcbfnmbkopoojfekhnkhdbieeh"; } # Dark Reader
+      { id = "gdbofhhdmcladcmmfjolgndfkpobecpg"; } # dont track me google
+      { id = "bkdgflcldnnnapblkhphbgpggdiikppg"; } # DDG Privacy Essentials
+      { id = "anlikcnbgdeidpacdbdljnabclhahhmd"; } # Enhanced GitHub
+      { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; } # uBlock Origin
+      { id = "hkligngkgcpcolhcnkgccglchdafcnao"; } # Web Archives
+      { id = "edibdbjcniadpccecjdfdjjppcpchdlm"; } # I still don't care about cookies
+      { id = "mdifmgkofhcnndinbbdbaplplnmdalnc"; } # Classis Blue theme
+    ];
   };
 
   # Make Netflix work
