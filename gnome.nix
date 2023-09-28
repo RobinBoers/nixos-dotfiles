@@ -2,14 +2,20 @@
 
 let 
   terminal = "${pkgs.kitty}/bin/kitty";
-in {
-  home.packages = with pkgs.gnomeExtensions; [
+  extensions = with pkgs.gnomeExtensions; [
     blur-my-shell
     rounded-window-corners
     dock-from-dash
     unite
     impatience
+  ]; 
+
+  apps = with pkgs; [
+    shortwave
+    baobab
   ];
+in {
+  home.packages = extensions ++ apps; 
 
   home.file.".local/share/applications/gnome-control-center.desktop".text = ''
     [Desktop Entry]
@@ -36,12 +42,6 @@ in {
         "code.desktop"
         "kitty.desktop"
       ];
-    };
-
-    # Wallpaper
-    "org/gnome/desktop/background" = {
-      picture-uri = "file:///nix/store/b52s9srq3g9i16rfhiws682kr2yf89h1-simple-blue-2016-02-19/share/backgrounds/nixos/nix-wallpaper-simple-blue.png";
-      picture-uri-dark = "file:///nix/store/nps9j555vjl968gxj5sczvc9b6f8vibx-simple-dark-gray-2016-02-19/share/backgrounds/nixos/nix-wallpaper-simple-dark-gray.png";
     };
 
     # Input
