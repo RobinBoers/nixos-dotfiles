@@ -39,9 +39,31 @@ in {
         "org.gnome.Nautilus.desktop"
         "spotify.desktop"
         "discord.desktop"
+        "de.haeckerfelix.Shortwave.desktop"
         "code.desktop"
         "kitty.desktop"
       ];
+
+      command-history = ["shutdown now"];
+
+      app-picker-layout = 
+        "[{'f2d32015-8b1b-4c33-8695-413a8a950e78': <{'position': <0>}>, '8f6f1753-4a0a-4b8b-b46a-e6dad4856503': <{'position': <1>}>, '04d85809-519b-4ace-81cf-14d177ef44c4': <{'position': <2>}>, 'Utilities': <{'position': <3>}>, 'f1c923d7-5dd0-4c2e-a221-d316c11fb6a2': <{'position': <4>}>, 'org.gnome.Settings.desktop': <{'position': <5>}>, 'org.gnome.Extensions.desktop': <{'position': <6>}>, 'filezilla.desktop': <{'position': <7>}>, 'element.desktop': <{'position': <8>}>, 'thunderbird.desktop': <{'position': <9>}>, 'cinny.desktop': <{'position': <10>}>, 'io.github.celluloid_player.Celluloid.desktop': <{'position': <11>}>, 'org.nickvision.cavalier.desktop': <{'position': <12>}>, 'Alacritty.desktop': <{'position': <13>}>, 'chromium-browser.desktop': <{'position': <14>}>}]";
+    };
+
+    # WM
+    "org/gnome/shell/extensions/unite" = {
+      autofocus-windows = true;
+      enable-titlebar-actions = false;
+      extend-left-box = false;
+      grayscale-tray-icons = true;
+      hide-activities-button = "never";
+      hide-app-menu-icon = false;
+      hide-dropdown-arrows = true;
+      notifications-position = "center";
+      reduce-panel-spacing = false;
+      show-desktop-name = false;
+      show-legacy-tray = true;
+      show-window-buttons = "never";
     };
 
     # Input
