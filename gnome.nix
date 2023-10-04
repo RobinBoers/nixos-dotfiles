@@ -39,6 +39,7 @@ in {
         "org.gnome.Nautilus.desktop"
         "spotify.desktop"
         "discord.desktop"
+        "cinny.desktop"
         "de.haeckerfelix.Shortwave.desktop"
         "code.desktop"
         "kitty.desktop"
