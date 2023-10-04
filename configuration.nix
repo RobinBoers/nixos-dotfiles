@@ -107,6 +107,10 @@
   # Enable flatpaks
   services.flatpak.enable = true;
 
+  # Enable android emulation
+  # Needed for exactly ONE STUPID SCHOOL APP
+  virtualisation.waydroid.enable = true;
+
   # Needed for direnv + nix-shell
   # to prevent invalidating caches.
   nix.settings = {
