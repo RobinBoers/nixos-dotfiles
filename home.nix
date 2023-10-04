@@ -145,6 +145,11 @@
     };
   };
 
+  programs.browserpass = {
+    enable = true;
+    browsers = [ "librewolf" ];
+  };
+
   services.gpg-agent = {
     enable = true;
     enableFishIntegration = true;
