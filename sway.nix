@@ -479,7 +479,7 @@ in {
         };
         "*" = {
           xkb_layout = "us";
-          #xkb_variant = "intl";
+          xkb_variant = "intl";
         };
       };
       focus = {
