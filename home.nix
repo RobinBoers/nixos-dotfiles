@@ -147,7 +147,7 @@
 
   programs.browserpass = {
     enable = true;
-    browsers = [ "librewolf" ];
+    browsers = [ "librewolf" "chromium" ];
   };
 
   services.gpg-agent = {
@@ -257,6 +257,7 @@
       { id = "hkligngkgcpcolhcnkgccglchdafcnao"; } # Web Archives
       { id = "edibdbjcniadpccecjdfdjjppcpchdlm"; } # I still don't care about cookies
       { id = "mdifmgkofhcnndinbbdbaplplnmdalnc"; } # Classis Blue theme
+      { id = "naepdomgkenhinolocfifgehidddafch"; } # Browserpass
     ];
   };
 
