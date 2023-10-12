@@ -231,6 +231,7 @@
 
   programs.sway = {
     enable = true;
+    package = (pkgs.swayfx.overrideAttrs (old: { passthru.providedSessions = [ "sway" ]; }));
     wrapperFeatures = {
       gtk = true;
       base = true;
