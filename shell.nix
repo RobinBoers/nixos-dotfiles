@@ -21,6 +21,32 @@ in {
     less = "less -QFr";
   };
 
+  # Append .local/bin to the path
+  home.sessionPath = [ 
+    "${config.home.homeDirectory}/.local/bin" 
+    "${config.home.homeDirectory}/.mix/escripts" 
+  ];
+
+  home.sessionVariables = {
+    ERL_AFLAGS = "-kernel shell_history enabled";
+    ELIXIR_ERL_OPTIONS = "-kernel start_pg true shell_history enabled";
+    DIRENV_LOG_FORMAT = ""; # Disable annoying direnv output
+  };
+
+  editorconfig = {
+    enable = true;
+    settings = {
+      "*" = {
+        charset = "UTF-8";
+        end_of_line = "lf";
+        trim_leading_whitespace = true;
+        indent_style = "space";
+        indent_size = "2";
+      };
+      "*.py" = { indent_size = "4"; };
+    };
+  };
+
   programs.fish = {
     enable = true;
     shellAliases = config.home.shellAliases;
