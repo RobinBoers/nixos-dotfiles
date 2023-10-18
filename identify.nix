@@ -57,7 +57,6 @@
       };
       "dupunkto.org" = {
         hostname = "45.90.13.70";
-        user = "robin";
         identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };
       "git.geheimesite.nl" = {
