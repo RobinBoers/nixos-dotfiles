@@ -4,7 +4,7 @@
   home.username = "robin";
   home.homeDirectory = "/home/robin";
 
-  imports = [ ./sway.nix ./gnome.nix ./neovim.nix ./vscode.nix ./shell.nix ./theming.nix ];
+  imports = [ ./sway.nix ./gnome.nix ./neovim.nix ./sublime.nix ./shell.nix ./theming.nix ];
 
   nixpkgs.config.allowUnfree = true; # Allow unfree packages
 
@@ -16,8 +16,9 @@
     imagemagick
 
     # Languages
-    erlang
+    erlang_26
     elixir_1_15
+    bun
     nixfmt
 
     # Graphical applications
@@ -178,8 +179,8 @@
         user = "robinb";
         identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };
-      "vps.geheimesite.nl" = {
-        hostname = "45.140.190.5";
+      "dupunkto.org" = {
+        hostname = "45.90.13.70";
         user = "robin";
         identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };

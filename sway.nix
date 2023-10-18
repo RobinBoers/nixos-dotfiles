@@ -490,10 +490,9 @@ in {
       };
       bars = [{
         colors = {
-          # iceberg
           background = "#${color-scheme.dark}";
 
-          # windows
+          # Windows
           # background = "#d1e5ef";
           # focusedWorkspace "#eef3f8 #eef3f8 #282A36";
           # inactiveWorkspace = "#d1e5ef #d1e5ef #282A36";

@@ -28,7 +28,15 @@
     hostsPath =
       "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts";
     hostsFile = builtins.fetchurl hostsPath;
-  in builtins.readFile "${hostsFile}";
+  in ''
+    ${builtins.readFile "${hostsFile}"}
+
+    # Disable Sublime Text license popups after
+    # entering cracked key.
+
+    0.0.0.0 telemetry.sublimehq.com
+    0.0.0.0 license.sublimehq.com
+  '';
 
   ## Locale
 
