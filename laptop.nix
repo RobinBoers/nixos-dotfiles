@@ -1,9 +1,6 @@
 { config, pkgs, lib, ... }:
 
 {
-  home.username = "robin";
-  home.homeDirectory = "/home/robin";
-
   home.packages = with pkgs; [
     # CLI tools
     yt-dlp
@@ -141,6 +138,7 @@
         live_config_reload = true;
         decorations_theme_variant = "Dark";
       };
+      font = { size = 19; };
       scrolling = {
         history = 10000;
         auto_scroll = true;
@@ -182,4 +180,4 @@
     Type=Application
     StartupNotify=true
   '';
-};
+}
