@@ -256,15 +256,15 @@ in {
   home.file.".githooks/pre-push" = {
     text = ''
       #!/bin/sh
-      # bix pre-push
+      bix pre-push
     '';
     executable = true;
   };
 
-  # home.file.".local/bin/bix" = {
-  #   text = builtins.readFile(builtins.fetchurl "https://git.geheimesite.nl/libre0b11/bix/raw/branch/master/bix.sh");
-  #   executable = true;
-  # };
+  home.file.".local/bin/bix" = {
+    text = builtins.readFile(builtins.fetchurl "https://git.dupunkto.org/~robin/libre0b11/bix/plain/bix.sh");
+    executable = true;
+  };
 
   programs.git.delta = {
     enable = true;
