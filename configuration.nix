@@ -192,6 +192,23 @@
     #package = (pkgs.mesa.override { galliumDrivers = [ "i915" "swrast" "virgl" ]; }).drivers;
   };
 
+  ## Services
+
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "pluto_dev" ];
+    authentication = ''
+      #type database  DBuser  auth-method
+      local all       all     trust
+      host  all       all     127.0.0.1/32   trust
+      host  all       all     ::1/128        trust
+    '';
+    settings = {
+      max_connections = 2000;
+      shared_buffers = "600MB";
+    };
+  };
+
   ## Graphical sessions
 
   ### GNOME
