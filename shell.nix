@@ -3,6 +3,10 @@
 let
   script-directory = "${config.home.homeDirectory}/sd";
 in {
+  home.packages = with pkgs; [
+    fishPlugins.z
+  ];
+
   home.shellAliases = {
     sudo = "doas";
     sudoedit = "doas $EDITOR";
