@@ -84,6 +84,17 @@ in {
     end
   '';
 
+  home.file.".config/fish/functions/fish_prompt.fish".text = ''
+    function fish_prompt
+      set -l prompt_symbol '$'
+      fish_is_root_user; and set prompt_symbol '#'
+
+      printf '%s%s@%s%s:%s%s%s%s ' (set_color green --bold) $USER \
+	 $hostname (set_color normal) (set_color blue) (prompt_pwd) \
+	 (set_color normal) $prompt_symbol
+    end
+  '';
+
   home.file.".config/fish/completions/sd.fish".text = ''
     # Completions for the custom Script Directory (sd) script
 
