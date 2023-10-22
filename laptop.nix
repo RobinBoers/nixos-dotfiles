@@ -28,6 +28,11 @@
     cinny-desktop
   ];
 
+  home.shellAliases = {
+    sudo = "doas";
+    sudoedit = "doas $EDITOR";
+  };
+
   home.sessionVariables.DEFAULT_BROWSER = "${pkgs.librewolf}/bin/librewolf"; # Needed for Electron apps
   home.sessionVariables.GTK_OVERLAY_SCROLLING = 1;
 

@@ -8,8 +8,6 @@ in {
   ];
 
   home.shellAliases = {
-    sudo = "doas";
-    sudoedit = "doas $EDITOR";
     cat = "bat";
     feh = "feh -Z --scale-down";
     tree = "exa -T";
@@ -18,7 +16,7 @@ in {
     clear = "printf '\\033[2J\\033[3J\\033[1;1H'";
 
     # Shortcuts
-    rm = "rm -ri";
+    rm = "rm -r";
     cp = "cp -i";
     mv = "mv -i";
     ".." = "cd ..";
