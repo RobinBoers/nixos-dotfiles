@@ -59,12 +59,6 @@
         hostname = "45.90.13.70";
         identityFile = "${config.home.homeDirectory}/.ssh/sweet";
       };
-      "git.geheimesite.nl" = {
-        hostname = "45.140.190.5";
-        port = 222;
-        user = "git";
-        identityFile = "${config.home.homeDirectory}/.ssh/github";
-      };
     };
   };
 }
