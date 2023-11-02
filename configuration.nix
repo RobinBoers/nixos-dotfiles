@@ -20,7 +20,7 @@
   networking.networkmanager.enable = true;
   networking.enableIPv6 = false;
   #networking.defaultGateway = "192.168.1.1";
-  #networking.nameservers = [ "8.8.8.8" ];
+  networking.nameservers = [ "8.8.8.8" ];
 
   # Hosts file
   # (Optionally remove '-porn' from the url ;) ...)
@@ -29,7 +29,7 @@
       "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts";
     hostsFile = builtins.fetchurl hostsPath;
   in ''
-    ${builtins.readFile "${hostsFile}"}
+    ${builtins.readFile "${hostsFile}"} 
 
     # Disable Sublime Text license popups after
     # entering cracked key.
@@ -111,6 +111,13 @@
     # Needed to make VM work
     #libva
   ];
+
+  # AUR but for NixOS
+  nixpkgs.config.packageOverrides = pkgs: {
+    nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+      inherit pkgs;
+    };
+  };
 
   # Enable flatpaks
   services.flatpak.enable = true;
