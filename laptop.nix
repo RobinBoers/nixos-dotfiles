@@ -7,6 +7,8 @@
     lazygit
     git-remote-gcrypt
     imagemagick
+    acpi
+    bsd-finger
 
     # Languages
     erlang_26
@@ -18,8 +20,6 @@
     gnome.nautilus
     libreoffice-fresh
     feh
-    librewolf
-    ungoogled-chromium
     celluloid
     filezilla
     thunderbird
@@ -33,7 +33,7 @@
     sudoedit = "doas $EDITOR";
   };
 
-  home.sessionVariables.DEFAULT_BROWSER = "${pkgs.librewolf}/bin/librewolf"; # Needed for Electron apps
+  home.sessionVariables.DEFAULT_BROWSER = "${pkgs.qutebrowser}/bin/qutebrowser"; # Needed for Electron apps
   home.sessionVariables.GTK_OVERLAY_SCROLLING = 1;
 
   ## XDG directories & default applications
@@ -60,12 +60,12 @@
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
-      "text/html" = "librewolf.desktop";
-      "application/pdf" = "librewolf.desktop";
-      "x-scheme-handler/http" = "librewolf.desktop";
-      "x-scheme-handler/https" = "librewolf.desktop";
-      "x-scheme-handler/about" = "librewolf.desktop";
-      "x-scheme-handler/unknown" = "librewolf.desktop";
+      "text/html" = "qutebrowser.desktop";
+      "application/pdf" = "qutebrowser.desktop";
+      "x-scheme-handler/http" = "qutebrowser.desktop";
+      "x-scheme-handler/https" = "qutebrowser.desktop";
+      "x-scheme-handler/about" = "qutebrowser.desktop";
+      "x-scheme-handler/unknown" = "qutebrowser.desktop";
     };
   };
 
@@ -153,9 +153,131 @@
     };
   };
 
+  # Browsers
+  # I used to use Firefox. However, I noticed to many quirks while using
+  # it. Webapps not working, styling issues, slowness bc sites were only
+  # optimized for Chrome. So I decided to ditch the Web altogether and use
+  # a minimal qutebrowser setup, with a fallback to Chrome for when I 
+  # REALLY need webapps.
+
+  programs.qutebrowser = {
+    enable = true;
+    loadAutoconfig = true; # Load settings made via GUI
+
+    keyBindings = let keybindings = {
+      "<Ctrl-l>" = "cmd-set-text -s :open";
+      "<Ctrl-f>" = "cmd-set-text /";
+      "<Ctrl-r>" = "reload";
+      "<Alt-Left>" = "back";
+      "<Alt-Right>" = "forward";
+      "<Ctrl-Tab>" = "tab-next";
+      "<Ctrl-t>" = "cmd-set-text -s :open -t ";
+      "<Ctrl-Shift-i>" = "devtools";
+      "<Ctrl-u>" = "view-source";
+      "<Ctrl-Shift-l>" = "yank pretty-url";
+      "<Ctrl-=>" = "zoom-in";
+      "<Ctrl-->" = "zoom-out";
+    }; in {
+      normal = keybindings;
+      insert = keybindings;
+    };
+        
+    # Search engines
+    searchEngines = let qwant = "https://lite.qwant.com/?q={}"; in {
+      DEFAULT = qwant;
+      w = "https://en.wikipedia.org/wiki/Special:Search?search={}&go=Go&ns0=1";
+      m = "https://search.marginalia.nu/search?query={}";
+      q = qwant;
+      g = "https://www.google.com/search?hl=en&q={}";
+    };
+
+    settings = {
+      # Preferences
+      content = { 
+        default_encoding = "UTF-8";
+        pdfjs = true; # Render PDFs
+        
+        # Don't let sites randomly play sounds
+        autoplay = false;
+        mute = true;
+      };
+      confirm_quit = [ "downloads" ];
+      scrolling.bar = "always";
+      url = let homepage = "about:blank"; in {
+        default_page = homepage;
+        start_pages = [ homepage ];
+      };
+
+      # Extreme privacy, breaks most things 
+      content.cookies.accept = "never"; # Disallow all cookies
+      content.cookies.store = false;
+      content.canvas_reading = false; # Disallow sites to read canvas
+      content.desktop_capture = false; # Disallow screen capture
+      content.geolocation = false; # Disallow location
+      content.headers.do_not_track = true; # Send Do-Not-Track header
+      content.headers.referer = "never"; # Don't send referer header
+      content.javascript.enabled = false; # Disable JavaScript
+      content.local_storage = false; # Disable localStorage & WebSQL
+      content.notifications.enabled = false; # Disable notifications
+      content.site_specific_quirks.enabled = false; # Don't try to make sites work. Fuck em!
+      content.webgl = false; # Disable WebGL
+     
+      # Disallow capturing video/sound
+      content.media = {
+        audio_video_capture = false;
+        video_capture = false;
+      };
+
+      # Adblocking
+      content.blocking = {
+        method = "adblock"; # Only use ABP, because hosts is already blocked system-wide.
+        adblock.lists = [
+          "https://easylist.to/easylist/easylist.txt"
+          "https://easylist.to/easylist/easyprivacy.txt"
+          "https://easylist-downloads.adblockplus.org/easylistdutch.txt"
+          "https://easylist-downloads.adblockplus.org/abp-filters-anti-cv.txt"
+          "https://www.i-dont-care-about-cookies.eu/abp/"
+          "https://secure.fanboy.co.nz/fanboy-cookiemonster.txt"
+        ];
+      };
+      
+      # Content appearance
+      fonts = {
+        default_family = "monospace";
+        default_size = "14pt";
+
+        # UI
+        completion.entry = "default_size default_family";
+        contextmenu = "default_size sans-serif";
+
+        # Content
+        web = {
+          family.standard = "sans-serif";
+          family.fixed = "monospace";
+          family.serif = "serif";
+          size.default = 17;
+          size.default_fixed = 21;
+        };
+      };
+
+      # Browser behavoir
+      tabs = {
+        last_close = "close";
+        show = "multiple";
+        tabs_are_windows = false; # Set to true to use window manager tabs instead.
+        mousewheel_switching = false;
+      };
+      input.insert_mode = {
+        auto_load = true;
+        leave_on_load = true;
+        auto_enter = true;
+        auto_leave = true;
+      };
+    };
+  };
+
   programs.chromium = {
     enable = true;
-    package = pkgs.ungoogled-chromium;
 
     extensions = [
       { id = "eimadpbcbfnmbkopoojfekhnkhdbieeh"; } # Dark Reader
@@ -163,26 +285,11 @@
       { id = "bkdgflcldnnnapblkhphbgpggdiikppg"; } # DDG Privacy Essentials
       { id = "anlikcnbgdeidpacdbdljnabclhahhmd"; } # Enhanced GitHub
       { id = "cjpalhdlnbpafiamejdnhcphjbkeiagm"; } # uBlock Origin
-      { id = "hkligngkgcpcolhcnkgccglchdafcnao"; } # Web Archives
       { id = "edibdbjcniadpccecjdfdjjppcpchdlm"; } # I still don't care about cookies
-      { id = "mdifmgkofhcnndinbbdbaplplnmdalnc"; } # Classis Blue theme
       { id = "naepdomgkenhinolocfifgehidddafch"; } # Browserpass
     ];
   };
 
   # Make Netflix work
   nixpkgs.config.chromium.enableWideVine = true;
-
-  # Shortcuts for my app menu
-
-  home.file.".local/share/applications/element.desktop".text = ''
-    [Desktop Entry]
-    Name=Element
-    Description=Matrix messenger
-    Icon=librewolf
-    Exec=librewolf https://app.element.io
-    Terminal=false
-    Type=Application
-    StartupNotify=true
-  '';
 }
